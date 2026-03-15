@@ -1,1 +1,932 @@
 
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gestione Ciclo - Concezione e Contraccezione</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Source+Sans+3:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              ink: "#111827",
+              mist: "#f4f5f1",
+              sage: {
+                50: "#f1f5f2",
+                100: "#dfe8e1",
+                200: "#bfcdbf",
+                500: "#6f8c79",
+                600: "#5b7565",
+              },
+              clay: {
+                50: "#f7f2ef",
+                100: "#efe4dd",
+                200: "#e1cfc5",
+                600: "#b87463",
+              },
+            },
+          },
+        },
+      };
+    </script>
+    <style>
+      :root {
+        --font-display: "Space Grotesk", sans-serif;
+        --font-body: "Source Sans 3", sans-serif;
+      }
+
+      body {
+        font-family: var(--font-body);
+      }
+
+      h1,
+      h2,
+      h3 {
+        font-family: var(--font-display);
+      }
+
+      .card {
+        border-radius: 24px;
+        border: 1px solid rgba(226, 232, 240, 0.7);
+        background: rgba(255, 255, 255, 0.78);
+        box-shadow: 0 18px 40px -32px rgba(15, 23, 42, 0.4);
+        backdrop-filter: blur(16px);
+      }
+
+      .fade-up {
+        animation: fadeUp 0.6s ease both;
+      }
+
+      .delay-1 {
+        animation-delay: 0.05s;
+      }
+
+      .delay-2 {
+        animation-delay: 0.12s;
+      }
+
+      .delay-3 {
+        animation-delay: 0.18s;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .day-cell {
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      }
+
+      .day-cell:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -14px rgba(15, 23, 42, 0.35);
+      }
+
+      .grid-background {
+        background-image: radial-gradient(
+            circle at 8% 12%,
+            rgba(111, 140, 121, 0.18),
+            transparent 40%
+          ),
+          radial-gradient(
+            circle at 88% 8%,
+            rgba(184, 116, 99, 0.12),
+            transparent 38%
+          );
+      }
+    </style>
+  </head>
+  <body class="bg-mist text-ink">
+    <div class="min-h-screen grid-background">
+      <div class="mx-auto max-w-6xl px-4 py-10">
+        <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+          <div class="space-y-2">
+            <div class="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-xs uppercase tracking-[0.2em] text-slate-500">
+              ciclo tracker
+            </div>
+            <h1 class="text-3xl font-semibold text-ink sm:text-4xl">
+              Gestione ciclo con due modalita
+            </h1>
+            <p class="max-w-xl text-sm text-slate-600">
+              Previsioni basate su media cicli, fase luteale e finestra fertile. Usa
+              la modalita adatta al tuo obiettivo.
+            </p>
+          </div>
+          <div class="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 text-xs text-slate-600">
+            Oggi: <span id="todayLabel" class="font-semibold text-slate-700"></span>
+          </div>
+        </header>
+
+        <main class="mt-8 grid gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+          <section class="space-y-6">
+            <div class="card fade-up p-5">
+              <h2 class="text-lg font-semibold text-ink">Setup iniziale</h2>
+              <div class="mt-4 space-y-4 text-sm text-slate-700">
+                <label class="block">
+                  <span class="text-xs uppercase tracking-wide text-slate-500">Inizio ultima mestruazione</span>
+                  <input
+                    id="lastPeriod"
+                    type="date"
+                    class="mt-2 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-sage-500 focus:outline-none"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs uppercase tracking-wide text-slate-500">Durata media ciclo (giorni)</span>
+                  <input
+                    id="avgCycle"
+                    type="number"
+                    min="20"
+                    max="45"
+                    class="mt-2 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-sage-500 focus:outline-none"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs uppercase tracking-wide text-slate-500">Durata fase luteale (giorni)</span>
+                  <input
+                    id="lutealLength"
+                    type="number"
+                    min="10"
+                    max="18"
+                    class="mt-2 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-sage-500 focus:outline-none"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs uppercase tracking-wide text-slate-500">Durata mestruazione (giorni)</span>
+                  <input
+                    id="periodLength"
+                    type="number"
+                    min="3"
+                    max="8"
+                    class="mt-2 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-sage-500 focus:outline-none"
+                  />
+                </label>
+              </div>
+            </div>
+
+            <div class="card fade-up delay-1 p-5">
+              <h2 class="text-lg font-semibold text-ink">Storico cicli</h2>
+              <p class="mt-2 text-xs text-slate-500">
+                Inserisci le durate dei cicli passati. La media viene calcolata in automatico.
+              </p>
+              <div class="mt-4 flex gap-2">
+                <input
+                  id="historyInput"
+                  type="number"
+                  min="20"
+                  max="45"
+                  placeholder="es. 29"
+                  class="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-sage-500 focus:outline-none"
+                />
+                <button
+                  id="addHistory"
+                  class="rounded-xl bg-sage-600 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-sage-500"
+                >
+                  Aggiungi
+                </button>
+              </div>
+              <div id="historyList" class="mt-4 flex flex-wrap gap-2"></div>
+              <div class="mt-4 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600">
+                <span>Media calcolata</span>
+                <span id="historyAverage" class="font-semibold text-slate-700"></span>
+              </div>
+              <button
+                id="clearHistory"
+                class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 hover:text-slate-700"
+              >
+                Svuota storico
+              </button>
+            </div>
+
+            <div class="card fade-up delay-2 p-5">
+              <h2 class="text-lg font-semibold text-ink">Modalita</h2>
+              <div class="mt-4 rounded-full border border-slate-200 bg-white/80 p-1">
+                <div class="grid grid-cols-2 gap-1" id="modeToggle">
+                  <button
+                    data-mode="conception"
+                    class="mode-btn rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide"
+                  >
+                    Cerca di concepire
+                  </button>
+                  <button
+                    data-mode="contraception"
+                    class="mode-btn rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide"
+                  >
+                    Contraccezione naturale
+                  </button>
+                </div>
+              </div>
+              <div class="mt-4 space-y-2 text-xs text-slate-600" id="modeHelp"></div>
+            </div>
+
+            <div class="card fade-up delay-3 p-5">
+              <h2 class="text-lg font-semibold text-ink">Log giornaliero</h2>
+              <div class="mt-2 text-xs text-slate-500">Seleziona un giorno nel calendario.</div>
+              <div class="mt-4 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700" id="logDate"></div>
+              <div class="mt-4 space-y-4 text-sm text-slate-700">
+                <label class="flex items-center justify-between rounded-xl border border-slate-200 bg-white/80 px-3 py-2">
+                  <span>Rapporti sessuali</span>
+                  <input id="logSex" type="checkbox" class="h-4 w-4 accent-sage-600" />
+                </label>
+                <label class="block">
+                  <span class="text-xs uppercase tracking-wide text-slate-500">Muco cervicale</span>
+                  <input
+                    id="logMucus"
+                    type="text"
+                    placeholder="Note rapide"
+                    class="mt-2 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-sage-500 focus:outline-none"
+                  />
+                </label>
+                <label class="block">
+                  <span class="text-xs uppercase tracking-wide text-slate-500">Temperatura basale (C)</span>
+                  <input
+                    id="logTemp"
+                    type="number"
+                    step="0.1"
+                    placeholder="36.5"
+                    class="mt-2 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-sage-500 focus:outline-none"
+                  />
+                </label>
+              </div>
+              <button
+                id="clearLog"
+                class="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 hover:text-slate-700"
+              >
+                Cancella log del giorno
+              </button>
+            </div>
+          </section>
+
+          <section class="space-y-6">
+            <div class="card fade-up p-5">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 class="text-lg font-semibold text-ink">Calendario dinamico</h2>
+                  <p class="text-xs text-slate-500">Finestra fertile, ovulazione e mestruazione prevista.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                  <button
+                    id="prevMonth"
+                    class="rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-sm font-semibold text-slate-600 hover:text-slate-800"
+                  >
+                    Prev
+                  </button>
+                  <div id="monthLabel" class="min-w-[140px] text-center text-sm font-semibold text-slate-700"></div>
+                  <button
+                    id="nextMonth"
+                    class="rounded-full border border-slate-200 bg-white/80 px-3 py-1 text-sm font-semibold text-slate-600 hover:text-slate-800"
+                  >
+                    Next
+                  </button>
+                </div>
+              </div>
+
+              <div class="mt-4 grid grid-cols-7 gap-2 text-center text-xs uppercase tracking-wide text-slate-400">
+                <div>Lun</div>
+                <div>Mar</div>
+                <div>Mer</div>
+                <div>Gio</div>
+                <div>Ven</div>
+                <div>Sab</div>
+                <div>Dom</div>
+              </div>
+              <div id="calendarGrid" class="mt-3 grid grid-cols-7 gap-2"></div>
+
+              <div class="mt-5 grid gap-3 text-xs text-slate-600 sm:grid-cols-2">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-2 w-6 rounded-full bg-clay-200"></span>
+                  <span>Mestruazione prevista</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-2 w-6 rounded-full bg-emerald-200"></span>
+                  <span>Finestra fertile (concezione)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-2 w-6 rounded-full bg-rose-200"></span>
+                  <span>Giorni a rischio (contraccezione)</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex h-2 w-6 rounded-full bg-rose-100 ring-1 ring-rose-200"></span>
+                  <span>Margine sicurezza</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card fade-up delay-1 p-5">
+              <h2 class="text-lg font-semibold text-ink">Previsioni principali</h2>
+              <div class="mt-4 grid gap-3 text-sm text-slate-700">
+                <div class="flex items-center justify-between">
+                  <span>Prossima mestruazione</span>
+                  <span id="nextPeriodLabel" class="font-semibold text-slate-800"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>Ovulazione stimata</span>
+                  <span id="ovulationLabel" class="font-semibold text-slate-800"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>Finestra fertile</span>
+                  <span id="fertileLabel" class="font-semibold text-slate-800"></span>
+                </div>
+              </div>
+              <div class="mt-4 rounded-2xl bg-sage-50 px-4 py-3 text-xs text-slate-600" id="predictionNote"></div>
+              <div class="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-xs text-slate-500">
+                Nota: le previsioni sono approssimative e non sostituiscono un parere medico.
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script>
+      (() => {
+        const STORAGE_KEY = "cycle-tracker-state-v1";
+        const MONTHS = ["Gen", "Feb", "Mar", "Apr", "Mag", "Giu", "Lug", "Ago", "Set", "Ott", "Nov", "Dic"];
+
+        const today = atNoon(new Date());
+
+        const defaultState = {
+          settings: {
+            lastPeriod: formatDateISO(today),
+            avgCycleLength: 28,
+            lutealLength: 14,
+            periodLength: 5,
+            mode: "conception",
+            history: [],
+          },
+          logs: {},
+          viewMonth: formatYearMonth(today),
+          selectedDate: formatDateISO(today),
+        };
+
+        const state = loadState();
+
+        const elements = {
+          todayLabel: document.getElementById("todayLabel"),
+          lastPeriod: document.getElementById("lastPeriod"),
+          avgCycle: document.getElementById("avgCycle"),
+          lutealLength: document.getElementById("lutealLength"),
+          periodLength: document.getElementById("periodLength"),
+          historyInput: document.getElementById("historyInput"),
+          addHistory: document.getElementById("addHistory"),
+          clearHistory: document.getElementById("clearHistory"),
+          historyList: document.getElementById("historyList"),
+          historyAverage: document.getElementById("historyAverage"),
+          modeToggle: document.getElementById("modeToggle"),
+          modeHelp: document.getElementById("modeHelp"),
+          prevMonth: document.getElementById("prevMonth"),
+          nextMonth: document.getElementById("nextMonth"),
+          monthLabel: document.getElementById("monthLabel"),
+          calendarGrid: document.getElementById("calendarGrid"),
+          logDate: document.getElementById("logDate"),
+          logSex: document.getElementById("logSex"),
+          logMucus: document.getElementById("logMucus"),
+          logTemp: document.getElementById("logTemp"),
+          clearLog: document.getElementById("clearLog"),
+          nextPeriodLabel: document.getElementById("nextPeriodLabel"),
+          ovulationLabel: document.getElementById("ovulationLabel"),
+          fertileLabel: document.getElementById("fertileLabel"),
+          predictionNote: document.getElementById("predictionNote"),
+        };
+
+        elements.todayLabel.textContent = formatDateLabel(today);
+
+        elements.lastPeriod.addEventListener("change", (event) => {
+          state.settings.lastPeriod = event.target.value;
+          saveState();
+          renderAll();
+        });
+
+        elements.avgCycle.addEventListener("change", (event) => {
+          state.settings.avgCycleLength = Number(event.target.value) || 28;
+          saveState();
+          renderAll();
+        });
+
+        elements.lutealLength.addEventListener("change", (event) => {
+          state.settings.lutealLength = Number(event.target.value) || 14;
+          saveState();
+          renderAll();
+        });
+
+        elements.periodLength.addEventListener("change", (event) => {
+          state.settings.periodLength = Number(event.target.value) || 5;
+          saveState();
+          renderAll();
+        });
+
+        elements.addHistory.addEventListener("click", () => {
+          const value = Number(elements.historyInput.value);
+          if (!Number.isFinite(value) || value < 20 || value > 45) return;
+          state.settings.history.push(value);
+          elements.historyInput.value = "";
+          saveState();
+          renderAll();
+        });
+
+        elements.historyInput.addEventListener("keydown", (event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            elements.addHistory.click();
+          }
+        });
+
+        elements.clearHistory.addEventListener("click", () => {
+          state.settings.history = [];
+          saveState();
+          renderAll();
+        });
+
+        elements.historyList.addEventListener("click", (event) => {
+          const btn = event.target.closest("[data-index]");
+          if (!btn) return;
+          const index = Number(btn.dataset.index);
+          state.settings.history.splice(index, 1);
+          saveState();
+          renderAll();
+        });
+
+        elements.modeToggle.addEventListener("click", (event) => {
+          const button = event.target.closest("[data-mode]");
+          if (!button) return;
+          state.settings.mode = button.dataset.mode;
+          saveState();
+          renderAll();
+        });
+
+        elements.prevMonth.addEventListener("click", () => {
+          const viewDate = parseYearMonth(state.viewMonth);
+          viewDate.setMonth(viewDate.getMonth() - 1);
+          state.viewMonth = formatYearMonth(viewDate);
+          saveState();
+          renderCalendar();
+        });
+
+        elements.nextMonth.addEventListener("click", () => {
+          const viewDate = parseYearMonth(state.viewMonth);
+          viewDate.setMonth(viewDate.getMonth() + 1);
+          state.viewMonth = formatYearMonth(viewDate);
+          saveState();
+          renderCalendar();
+        });
+
+        elements.calendarGrid.addEventListener("click", (event) => {
+          const cell = event.target.closest("[data-date]");
+          if (!cell) return;
+          state.selectedDate = cell.dataset.date;
+          saveState();
+          renderCalendar();
+          renderLog();
+        });
+
+        elements.logSex.addEventListener("change", (event) => {
+          updateLog({ sex: event.target.checked });
+        });
+
+        elements.logMucus.addEventListener("input", (event) => {
+          updateLog({ mucus: event.target.value.trim() });
+        });
+
+        elements.logTemp.addEventListener("input", (event) => {
+          const value = event.target.value;
+          updateLog({ temp: value === "" ? "" : Number(value) });
+        });
+
+        elements.clearLog.addEventListener("click", () => {
+          delete state.logs[state.selectedDate];
+          saveState();
+          renderCalendar();
+          renderLog();
+        });
+
+        function renderAll() {
+          elements.lastPeriod.value = state.settings.lastPeriod;
+          elements.avgCycle.value = state.settings.avgCycleLength;
+          elements.lutealLength.value = state.settings.lutealLength;
+          elements.periodLength.value = state.settings.periodLength;
+          renderHistory();
+          renderMode();
+          renderCalendar();
+          renderPredictions();
+          renderLog();
+        }
+
+        function renderHistory() {
+          const { avg, avgRounded } = computeStats();
+          elements.historyAverage.textContent = `${avgRounded} giorni`;
+
+          elements.historyList.innerHTML = "";
+          state.settings.history.forEach((value, index) => {
+            const chip = document.createElement("button");
+            chip.className =
+              "flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs text-slate-600 hover:border-slate-300";
+            chip.dataset.index = index;
+            chip.innerHTML = `${value} giorni <span class="text-slate-400">x</span>`;
+            elements.historyList.appendChild(chip);
+          });
+        }
+
+        function renderMode() {
+          const buttons = elements.modeToggle.querySelectorAll(".mode-btn");
+          buttons.forEach((btn) => {
+            if (btn.dataset.mode === state.settings.mode) {
+              btn.classList.add("bg-sage-600", "text-white");
+              btn.classList.remove("text-slate-600");
+            } else {
+              btn.classList.remove("bg-sage-600", "text-white");
+              btn.classList.add("text-slate-600");
+            }
+          });
+
+          if (state.settings.mode === "conception") {
+            elements.modeHelp.innerHTML =
+              "<div class='rounded-xl bg-emerald-50 px-3 py-2'>Evidenziamo la finestra fertile con segnali verdi per favorire il concepimento.</div>";
+          } else {
+            elements.modeHelp.innerHTML =
+              "<div class='rounded-xl bg-rose-50 px-3 py-2'>Evidenziamo i giorni a rischio con segnali rossi. Se i cicli sono irregolari ampliamo il margine.</div>";
+          }
+        }
+
+        function renderCalendar() {
+          const viewDate = parseYearMonth(state.viewMonth);
+          const monthStart = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1, 12);
+          const monthEnd = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0, 12);
+          const startDay = (monthStart.getDay() + 6) % 7;
+          const totalCells = Math.ceil((startDay + monthEnd.getDate()) / 7) * 7;
+          const gridStart = addDays(monthStart, -startDay);
+          const gridEnd = addDays(gridStart, totalCells - 1);
+
+          const { sigma } = computeStats();
+          const margin = state.settings.mode === "contraception" && sigma >= 2 ? Math.ceil(sigma) : 0;
+          const cycles = buildCycles(gridStart, gridEnd);
+
+          elements.monthLabel.textContent = formatMonthLabel(viewDate);
+          elements.calendarGrid.innerHTML = "";
+
+          for (let i = 0; i < totalCells; i += 1) {
+            const date = addDays(gridStart, i);
+            const dateStr = formatDateISO(date);
+            const inMonth = date.getMonth() === viewDate.getMonth();
+            const status = getDayStatus(date, cycles, margin);
+            const log = state.logs[dateStr];
+
+            const cell = document.createElement("button");
+            cell.dataset.date = dateStr;
+            cell.className = [
+              "day-cell rounded-2xl border p-2 text-left text-xs",
+              inMonth ? "bg-white/90 text-slate-700" : "bg-white/50 text-slate-400",
+              status.isMenses ? "border-clay-200" : "border-slate-200/60",
+              status.isFertile && state.settings.mode === "conception" ? "bg-emerald-50 border-emerald-200" : "",
+              status.isRisk && state.settings.mode === "contraception"
+                ? status.isRiskMargin
+                  ? "bg-rose-50 border-rose-200 ring-1 ring-rose-100"
+                  : "bg-rose-100 border-rose-200"
+                : "",
+              state.selectedDate === dateStr ? "ring-2 ring-sage-500" : "",
+              isSameDay(date, today) ? "ring-1 ring-sage-300" : "",
+            ]
+              .filter(Boolean)
+              .join(" ");
+
+            const titleParts = [];
+            if (status.isMenses) titleParts.push("Mestruazione prevista");
+            if (status.isFertile) titleParts.push("Finestra fertile");
+            if (status.isOvulation) titleParts.push("Ovulazione stimata");
+            if (status.isRisk && state.settings.mode === "contraception") titleParts.push("Giorno a rischio");
+            cell.title = titleParts.join(" | ");
+
+            const header = document.createElement("div");
+            header.className = "flex items-start justify-between";
+            header.innerHTML = `
+              <span class="text-sm font-semibold">${date.getDate()}</span>
+              <span class="flex items-center gap-1">
+                ${status.isOvulation ? iconSpark() : ""}
+                ${status.isFertile && state.settings.mode === "conception" ? iconLeaf("emerald") : ""}
+                ${status.isRisk && state.settings.mode === "contraception" ? iconWarning(status.isRiskMargin) : ""}
+              </span>
+            `;
+            cell.appendChild(header);
+
+            const logRow = document.createElement("div");
+            logRow.className = "mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500";
+            if (log?.sex) logRow.innerHTML += iconHeart();
+            if (log?.mucus) logRow.innerHTML += iconDrop();
+            if (log?.temp || log?.temp === 0) logRow.innerHTML += iconThermo(log.temp);
+            cell.appendChild(logRow);
+
+            if (status.isMenses) {
+              const bar = document.createElement("div");
+              bar.className = "mt-2 h-1 w-full rounded-full bg-clay-200";
+              cell.appendChild(bar);
+            }
+
+            elements.calendarGrid.appendChild(cell);
+          }
+        }
+
+        function renderPredictions() {
+          const { avg, avgRounded, sigma } = computeStats();
+          const lastStart = parseDateISO(state.settings.lastPeriod) || today;
+          const nextPeriod = addDays(lastStart, avgRounded);
+          const ovulation = addDays(nextPeriod, -state.settings.lutealLength);
+          const fertileStart = addDays(ovulation, -5);
+          const fertileEnd = addDays(ovulation, 1);
+          const margin = state.settings.mode === "contraception" && sigma >= 2 ? Math.ceil(sigma) : 0;
+
+          const rangeStart = margin ? addDays(nextPeriod, -margin) : nextPeriod;
+          const rangeEnd = margin ? addDays(nextPeriod, margin) : nextPeriod;
+
+          elements.nextPeriodLabel.textContent =
+            margin > 0 ? `${formatDateLabel(rangeStart)} - ${formatDateLabel(rangeEnd)}` : formatDateLabel(nextPeriod);
+          elements.ovulationLabel.textContent = formatDateLabel(ovulation);
+          elements.fertileLabel.textContent = `${formatDateLabel(fertileStart)} - ${formatDateLabel(fertileEnd)}`;
+
+          const noteParts = [
+            `Media calcolata: ${avg.toFixed(1)} giorni (usata ${avgRounded}).`,
+          ];
+
+          if (sigma > 0) {
+            noteParts.push(`Deviazione standard: ${sigma.toFixed(1)} giorni.`);
+          } else {
+            noteParts.push("Deviazione standard: non disponibile con pochi dati.");
+          }
+
+          if (margin > 0) {
+            noteParts.push(`Margine sicurezza in contraccezione: +/- ${margin} giorni.`);
+          }
+
+          elements.predictionNote.textContent = noteParts.join(" ");
+        }
+
+        function renderLog() {
+          const dateStr = state.selectedDate || formatDateISO(today);
+          const dateObj = parseDateISO(dateStr) || today;
+          const log = state.logs[dateStr] || { sex: false, mucus: "", temp: "" };
+
+          elements.logDate.textContent = formatDateLabel(dateObj);
+          elements.logSex.checked = Boolean(log.sex);
+          elements.logMucus.value = log.mucus || "";
+          elements.logTemp.value = log.temp === "" || log.temp === undefined ? "" : log.temp;
+        }
+
+        function updateLog(update) {
+          const dateStr = state.selectedDate || formatDateISO(today);
+          const current = state.logs[dateStr] || { sex: false, mucus: "", temp: "" };
+          const next = { ...current, ...update };
+
+          const hasContent =
+            Boolean(next.sex) ||
+            (next.mucus && next.mucus.length > 0) ||
+            (next.temp !== "" && next.temp !== undefined && !Number.isNaN(next.temp));
+
+          if (hasContent) {
+            state.logs[dateStr] = next;
+          } else {
+            delete state.logs[dateStr];
+          }
+
+          saveState();
+          renderCalendar();
+        }
+
+        function buildCycles(rangeStart, rangeEnd) {
+          const lastStart = parseDateISO(state.settings.lastPeriod) || today;
+          const { avgRounded } = computeStats();
+          const cycleLength = clamp(avgRounded, 20, 45);
+
+          let start = lastStart;
+          while (start > rangeStart) {
+            start = addDays(start, -cycleLength);
+          }
+
+          const cycles = [];
+          const endLimit = addDays(rangeEnd, cycleLength + state.settings.lutealLength + 10);
+          while (start <= endLimit) {
+            const nextPeriod = addDays(start, cycleLength);
+            const ovulation = addDays(nextPeriod, -state.settings.lutealLength);
+            const fertileStart = addDays(ovulation, -5);
+            const fertileEnd = addDays(ovulation, 1);
+            cycles.push({ start, nextPeriod, ovulation, fertileStart, fertileEnd });
+            start = addDays(start, cycleLength);
+          }
+          return cycles;
+        }
+
+        function getDayStatus(date, cycles, margin) {
+          const periodLength = clamp(Number(state.settings.periodLength) || 5, 3, 8);
+          let isMenses = false;
+          let isOvulation = false;
+          let isFertile = false;
+          let isRisk = false;
+
+          cycles.forEach((cycle) => {
+            const mensesEnd = addDays(cycle.start, periodLength - 1);
+            if (inRange(date, cycle.start, mensesEnd)) isMenses = true;
+            if (isSameDay(date, cycle.ovulation)) isOvulation = true;
+            if (inRange(date, cycle.fertileStart, cycle.fertileEnd)) isFertile = true;
+            if (margin > 0) {
+              const riskStart = addDays(cycle.fertileStart, -margin);
+              const riskEnd = addDays(cycle.fertileEnd, margin);
+              if (inRange(date, riskStart, riskEnd)) isRisk = true;
+            }
+          });
+
+          if (state.settings.mode === "contraception") {
+            if (margin === 0) {
+              isRisk = isFertile;
+            } else {
+              isRisk = isRisk || isFertile;
+            }
+          }
+
+          const isRiskMargin = state.settings.mode === "contraception" && isRisk && !isFertile;
+
+          return { isMenses, isOvulation, isFertile, isRisk, isRiskMargin };
+        }
+
+        function computeStats() {
+          const history = state.settings.history.filter((value) => Number.isFinite(value));
+          const avgManual = Number(state.settings.avgCycleLength) || 28;
+          let avg = avgManual;
+          let sigma = 0;
+
+          if (history.length) {
+            avg = history.reduce((sum, value) => sum + value, 0) / history.length;
+            if (history.length > 1) {
+              const variance =
+                history.reduce((sum, value) => sum + Math.pow(value - avg, 2), 0) / (history.length - 1);
+              sigma = Math.sqrt(variance);
+            }
+          }
+
+          return { avg, avgRounded: Math.round(avg), sigma };
+        }
+
+        function loadState() {
+          const fallback = JSON.parse(JSON.stringify(defaultState));
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (!raw) return fallback;
+          try {
+            const parsed = JSON.parse(raw);
+            return {
+              ...fallback,
+              ...parsed,
+              settings: {
+                ...fallback.settings,
+                ...(parsed.settings || {}),
+                history: Array.isArray(parsed.settings?.history) ? parsed.settings.history : [],
+              },
+              logs: parsed.logs || {},
+            };
+          } catch (err) {
+            return fallback;
+          }
+        }
+
+        function saveState() {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        }
+
+        function formatDateLabel(date) {
+          return `${String(date.getDate()).padStart(2, "0")} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+        }
+
+        function formatMonthLabel(date) {
+          return `${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+        }
+
+        function formatDateISO(date) {
+          return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(
+            date.getDate()
+          ).padStart(2, "0")}`;
+        }
+
+        function formatYearMonth(date) {
+          return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+        }
+
+        function parseDateISO(value) {
+          if (!value) return null;
+          const [year, month, day] = value.split("-").map(Number);
+          if (!year || !month || !day) return null;
+          return new Date(year, month - 1, day, 12);
+        }
+
+        function parseYearMonth(value) {
+          const [year, month] = value.split("-").map(Number);
+          return new Date(year, month - 1, 1, 12);
+        }
+
+        function addDays(date, days) {
+          const next = new Date(date);
+          next.setDate(next.getDate() + days);
+          next.setHours(12, 0, 0, 0);
+          return next;
+        }
+
+        function atNoon(date) {
+          const next = new Date(date);
+          next.setHours(12, 0, 0, 0);
+          return next;
+        }
+
+        function isSameDay(a, b) {
+          return (
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate()
+          );
+        }
+
+        function inRange(date, start, end) {
+          return date >= start && date <= end;
+        }
+
+        function clamp(value, min, max) {
+          return Math.min(max, Math.max(min, value));
+        }
+
+        function iconSpark() {
+          return `
+            <span class="text-amber-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 1.8 4.2 4.2 1.8-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3Z" />
+              </svg>
+            </span>
+          `;
+        }
+
+        function iconLeaf(color) {
+          const hue = color === "emerald" ? "text-emerald-500" : "text-sage-600";
+          return `
+            <span class="${hue}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z" />
+              </svg>
+            </span>
+          `;
+        }
+
+        function iconWarning(isMargin) {
+          return `
+            <span class="${isMargin ? "text-rose-400" : "text-rose-600"}">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 2.5 20h19L12 3Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01" />
+              </svg>
+            </span>
+          `;
+        }
+
+        function iconHeart() {
+          return `
+            <span class="text-sage-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20.3 6.2a4.5 4.5 0 0 0-6.4 0L12 8.1l-1.9-1.9a4.5 4.5 0 0 0-6.4 6.4l1.9 1.9L12 21l6.5-6.5 1.9-1.9a4.5 4.5 0 0 0 0-6.4Z" />
+              </svg>
+            </span>
+          `;
+        }
+
+        function iconDrop() {
+          return `
+            <span class="text-clay-600">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c4 5 6 7.5 6 10a6 6 0 0 1-12 0c0-2.5 2-5 6-10Z" />
+              </svg>
+            </span>
+          `;
+        }
+
+        function iconThermo(value) {
+          const label = value !== "" ? `<span class="ml-1">${Number(value).toFixed(1)}</span>` : "";
+          return `
+            <span class="inline-flex items-center text-slate-500">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10 14a2 2 0 1 0 4 0V6a2 2 0 1 0-4 0v8Z" />
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 20a4 4 0 0 0 4-4v-1a4 4 0 0 0-8 0v1a4 4 0 0 0 4 4Z" />
+              </svg>
+              ${label}
+            </span>
+          `;
+        }
+
+        renderAll();
+      })();
+    </script>
+  </body>
+</html>
