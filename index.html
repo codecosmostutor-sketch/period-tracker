@@ -4,18 +4,21 @@
     <title>Gestione Ciclo - Concezione e Contraccezione</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&amp;family=Source+Sans+3:wght@400;500;600&amp;display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@400;600;700&amp;family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              cerulean: "#0081a7",
-              "tropical-teal": "#00afb9",
-              "light-yellow": "#fdfcdc",
-              "soft-apricot": "#fed9b7",
-              "vibrant-coral": "#f07167",
+              midnight: "#1c1c2e",
+              harbor: "#3a506b",
+              tide: "#5bc0be",
+              mist: "#eaeaea",
+              linen: "#f5f1ea",
+              coral: "#f2b5a7",
+              sun: "#f4d06f",
+              moss: "#7fa99b",
             },
           },
         },
@@ -23,13 +26,20 @@
     </script>
     <style>
       :root {
-        --font-display: "Space Grotesk", sans-serif;
-        --font-body: "Source Sans 3", sans-serif;
+        --font-display: "Fraunces", serif;
+        --font-body: "Manrope", sans-serif;
+        --phase-menstrual: #f2b5a7;
+        --phase-follicular: #5bc0be;
+        --phase-ovulation: #f4d06f;
+        --phase-luteal: #3a506b;
+        --phase-fertile: #7fd1c8;
+        --phase-risk: #f07b78;
       }
 
       body {
         font-family: var(--font-body);
         padding-bottom: env(safe-area-inset-bottom);
+        background: #eaeaea;
       }
 
       h1,
@@ -40,10 +50,10 @@
 
       .card {
         border-radius: 24px;
-        border: 1px solid rgba(0, 129, 167, 0.18);
-        background: rgba(255, 255, 255, 0.78);
-        box-shadow: 0 18px 40px -32px rgba(15, 23, 42, 0.4);
-        backdrop-filter: blur(16px);
+        border: 1px solid rgba(28, 28, 46, 0.08);
+        background: rgba(245, 241, 234, 0.85);
+        box-shadow: 0 16px 40px -26px rgba(28, 28, 46, 0.35);
+        backdrop-filter: blur(18px);
       }
 
       .fade-up {
@@ -73,684 +83,519 @@
         }
       }
 
-      .day-cell {
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+      .ambient-background {
+        background-image: radial-gradient(circle at 12% 18%, rgba(91, 192, 190, 0.3), transparent 42%),
+          radial-gradient(circle at 78% 12%, rgba(244, 208, 111, 0.28), transparent 38%),
+          radial-gradient(circle at 88% 80%, rgba(242, 181, 167, 0.25), transparent 45%);
       }
 
-      .day-cell:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 20px -14px rgba(15, 23, 42, 0.35);
+      .soft-glow {
+        box-shadow: 0 0 18px rgba(91, 192, 190, 0.45);
       }
 
-      .grid-background {
-        background-image: radial-gradient(
-            circle at 12% 14%,
-            rgba(0, 129, 167, 0.18),
-            transparent 42%
-          ),
-          radial-gradient(
-            circle at 82% 10%,
-            rgba(0, 175, 185, 0.16),
-            transparent 40%
-          ),
-          radial-gradient(
-            circle at 90% 85%,
-            rgba(240, 113, 103, 0.14),
-            transparent 45%
-          );
+      .pill {
+        border-radius: 999px;
+        border: 1px solid rgba(28, 28, 46, 0.12);
+        background: rgba(255, 255, 255, 0.8);
+        transition: all 0.2s ease;
+      }
+
+      .pill:hover {
+        transform: translateY(-1px);
+        border-color: rgba(91, 192, 190, 0.5);
+        box-shadow: 0 12px 24px -18px rgba(28, 28, 46, 0.4);
+      }
+
+      .pill.is-active {
+        background: rgba(91, 192, 190, 0.2);
+        border-color: rgba(91, 192, 190, 0.7);
+        color: #1c1c2e;
+      }
+
+      .orbit {
+        position: relative;
+        width: min(280px, 78vw);
+        height: min(280px, 78vw);
+        margin: 0 auto;
+      }
+
+      .orbit::before {
+        content: "";
+        position: absolute;
+        inset: 10%;
+        border-radius: 50%;
+        border: 1px dashed rgba(28, 28, 46, 0.2);
+      }
+
+      .orbit-segments {
+        position: absolute;
+        inset: 0;
+        animation: orbitSpin 60s linear infinite;
+      }
+
+      .orbit-segment {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 10px;
+        height: 28px;
+        border-radius: 999px;
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-118px);
+        transition: transform 0.25s ease, box-shadow 0.25s ease, opacity 0.25s ease;
+        opacity: 0.75;
+      }
+
+      .orbit-segment.is-selected,
+      .orbit-segment:hover {
+        transform: translate(-50%, -50%) rotate(var(--angle)) translateY(-118px) scale(1.12);
+        opacity: 1;
+      }
+
+      .orbit-segment.is-today {
+        box-shadow: 0 0 16px rgba(91, 192, 190, 0.7);
+        opacity: 1;
+      }
+
+      .orbit-segment.phase-menstrual {
+        background: var(--phase-menstrual);
+      }
+      .orbit-segment.phase-menses {
+        background: var(--phase-menstrual);
+      }
+      .orbit-segment.phase-follicular {
+        background: var(--phase-follicular);
+      }
+      .orbit-segment.phase-ovulation {
+        background: var(--phase-ovulation);
+      }
+      .orbit-segment.phase-luteal {
+        background: var(--phase-luteal);
+      }
+
+      .orbit-segment.is-fertile {
+        box-shadow: 0 0 12px rgba(91, 192, 190, 0.7);
+      }
+      .orbit-segment.is-ovulation {
+        box-shadow: 0 0 14px rgba(244, 208, 111, 0.9);
+      }
+      .orbit-segment.is-risk {
+        box-shadow: 0 0 12px rgba(240, 123, 120, 0.8);
+      }
+      .orbit-segment.is-margin {
+        box-shadow: 0 0 12px rgba(242, 181, 167, 0.8);
+      }
+      .orbit-segment.is-menses {
+        outline: 2px solid rgba(242, 181, 167, 0.5);
+      }
+
+      .orbit-core {
+        position: absolute;
+        inset: 28%;
+        border-radius: 50%;
+        background: rgba(28, 28, 46, 0.06);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 12px;
+        backdrop-filter: blur(8px);
+      }
+
+      .creature {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        border-radius: 40% 60% 55% 45%;
+        background: rgba(91, 192, 190, 0.35);
+        margin: 0 auto;
+        transition: all 0.4s ease;
+        animation: floaty 4s ease-in-out infinite;
+      }
+
+      .creature::before,
+      .creature::after {
+        content: "";
+        position: absolute;
+        top: 42%;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(28, 28, 46, 0.6);
+      }
+
+      .creature::before {
+        left: 35%;
+      }
+
+      .creature::after {
+        right: 35%;
+      }
+
+      .creature[data-phase="menstrual"],
+      .creature[data-phase="menses"] {
+        background: rgba(242, 181, 167, 0.5);
+        border-radius: 55% 45% 60% 40%;
+      }
+
+      .creature[data-phase="follicular"] {
+        background: rgba(91, 192, 190, 0.45);
+        border-radius: 45% 55% 40% 60%;
+      }
+
+      .creature[data-phase="ovulation"] {
+        background: rgba(244, 208, 111, 0.55);
+        border-radius: 50% 50% 35% 65%;
+      }
+
+      .creature[data-phase="luteal"] {
+        background: rgba(58, 80, 107, 0.35);
+        border-radius: 60% 40% 55% 45%;
+      }
+
+      @keyframes orbitSpin {
+        from {
+          transform: rotate(0deg);
+        }
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes floaty {
+        0%,
+        100% {
+          transform: translateY(0);
+        }
+        50% {
+          transform: translateY(-6px);
+        }
       }
     </style>
-  <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-2{height:0.5rem}.h-36{height:9rem}.h-4{height:1rem}.h-5{height:1.25rem}.h-1{height:0.25rem}.min-h-screen{min-height:100vh}.min-h-\[78px\]{min-height:78px}.w-4{width:1rem}.w-5{width:1.25rem}.w-6{width:1.5rem}.w-full{width:100%}.min-w-\[140px\]{min-width:140px}.max-w-6xl{max-width:72rem}.max-w-sm{max-width:24rem}.max-w-xl{max-width:36rem}.cursor-pointer{cursor:pointer}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.grid-cols-7{grid-template-columns:repeat(7, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-start{align-items:flex-start}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-1\.5{gap:0.375rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.\!border-cerulean\/40{border-color:rgb(0 129 167 / 0.4) !important}.border-cerulean\/10{border-color:rgb(0 129 167 / 0.1)}.border-cerulean\/20{border-color:rgb(0 129 167 / 0.2)}.border-cerulean\/30{border-color:rgb(0 129 167 / 0.3)}.border-slate-200{--tw-border-opacity:1;border-color:rgb(226 232 240 / var(--tw-border-opacity, 1))}.border-vibrant-coral\/40{border-color:rgb(240 113 103 / 0.4)}.border-slate-200\/60{border-color:rgb(226 232 240 / 0.6)}.border-soft-apricot\/70{border-color:rgb(254 217 183 / 0.7)}.border-tropical-teal\/40{border-color:rgb(0 175 185 / 0.4)}.bg-cerulean{--tw-bg-opacity:1;background-color:rgb(0 129 167 / var(--tw-bg-opacity, 1))}.bg-light-yellow{--tw-bg-opacity:1;background-color:rgb(253 252 220 / var(--tw-bg-opacity, 1))}.bg-light-yellow\/90{background-color:rgb(253 252 220 / 0.9)}.bg-slate-50{--tw-bg-opacity:1;background-color:rgb(248 250 252 / var(--tw-bg-opacity, 1))}.bg-slate-900\/30{background-color:rgb(15 23 42 / 0.3)}.bg-soft-apricot{--tw-bg-opacity:1;background-color:rgb(254 217 183 / var(--tw-bg-opacity, 1))}.bg-soft-apricot\/60{background-color:rgb(254 217 183 / 0.6)}.bg-soft-apricot\/70{background-color:rgb(254 217 183 / 0.7)}.bg-tropical-teal\/15{background-color:rgb(0 175 185 / 0.15)}.bg-tropical-teal\/40{background-color:rgb(0 175 185 / 0.4)}.bg-vibrant-coral\/40{background-color:rgb(240 113 103 / 0.4)}.bg-white\/70{background-color:rgb(255 255 255 / 0.7)}.bg-white\/80{background-color:rgb(255 255 255 / 0.8)}.bg-white\/90{background-color:rgb(255 255 255 / 0.9)}.bg-white\/95{background-color:rgb(255 255 255 / 0.95)}.bg-tropical-teal\/10{background-color:rgb(0 175 185 / 0.1)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-white\/50{background-color:rgb(255 255 255 / 0.5)}.p-1{padding:0.25rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.p-1\.5{padding:0.375rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.text-left{text-align:left}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.tracking-\[0\.2em\]{letter-spacing:0.2em}.tracking-wide{letter-spacing:0.025em}.text-cerulean{--tw-text-opacity:1;color:rgb(0 129 167 / var(--tw-text-opacity, 1))}.text-slate-400{--tw-text-opacity:1;color:rgb(148 163 184 / var(--tw-text-opacity, 1))}.text-slate-500{--tw-text-opacity:1;color:rgb(100 116 139 / var(--tw-text-opacity, 1))}.text-slate-600{--tw-text-opacity:1;color:rgb(71 85 105 / var(--tw-text-opacity, 1))}.text-slate-700{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.text-slate-800{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.text-slate-900{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.text-tropical-teal{--tw-text-opacity:1;color:rgb(0 175 185 / var(--tw-text-opacity, 1))}.text-vibrant-coral{--tw-text-opacity:1;color:rgb(240 113 103 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.accent-cerulean{accent-color:#0081a7}.ring-1{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.ring-2{--tw-ring-offset-shadow:var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);--tw-ring-shadow:var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);box-shadow:var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000)}.ring-vibrant-coral\/30{--tw-ring-color:rgb(240 113 103 / 0.3)}.ring-cerulean\/70{--tw-ring-color:rgb(0 129 167 / 0.7)}.ring-cerulean\/30{--tw-ring-color:rgb(0 129 167 / 0.3)}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:border-cerulean:hover{--tw-border-opacity:1;border-color:rgb(0 129 167 / var(--tw-border-opacity, 1))}.hover\:border-vibrant-coral:hover{--tw-border-opacity:1;border-color:rgb(240 113 103 / var(--tw-border-opacity, 1))}.hover\:bg-tropical-teal:hover{--tw-bg-opacity:1;background-color:rgb(0 175 185 / var(--tw-bg-opacity, 1))}.hover\:text-slate-700:hover{--tw-text-opacity:1;color:rgb(51 65 85 / var(--tw-text-opacity, 1))}.hover\:text-slate-800:hover{--tw-text-opacity:1;color:rgb(30 41 59 / var(--tw-text-opacity, 1))}.hover\:text-slate-900:hover{--tw-text-opacity:1;color:rgb(15 23 42 / var(--tw-text-opacity, 1))}.focus\:border-tropical-teal:focus{--tw-border-opacity:1;border-color:rgb(0 175 185 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width: 640px){.sm\:mt-8{margin-top:2rem}.sm\:h-40{height:10rem}.sm\:min-h-\[96px\]{min-height:96px}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-end{align-items:flex-end}.sm\:items-center{align-items:center}.sm\:justify-between{justify-content:space-between}.sm\:gap-2{gap:0.5rem}.sm\:gap-6{gap:1.5rem}.sm\:p-5{padding:1.25rem}.sm\:p-2{padding:0.5rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:py-10{padding-top:2.5rem;padding-bottom:2.5rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}}@media (min-width: 1024px){.lg\:grid-cols-\[360px_minmax\(0\2c 1fr\)\]{grid-template-columns:360px minmax(0,1fr)}}</style><script src="https://www.googletagmanager.com/gtag/js?l=dataLayer&amp;id=G-9MMCBQCT8Z" async=""></script></head>
-  <body class="bg-light-yellow text-slate-900">
-    <div id="authGate" class="fixed inset-0 z-50 items-center justify-center bg-light-yellow/90 p-4 hidden">
-      <div class="card w-full max-w-sm border-cerulean/30 bg-white/95 p-4 sm:p-5">
-        <h2 class="text-xl font-semibold text-slate-900">Accedi</h2>
-        <p class="mt-2 text-xs text-slate-500">
-          Accedi con email o Google. Abilita i provider nel console Firebase.
+  <style>*, ::before, ::after{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }::backdrop{--tw-border-spacing-x:0;--tw-border-spacing-y:0;--tw-translate-x:0;--tw-translate-y:0;--tw-rotate:0;--tw-skew-x:0;--tw-skew-y:0;--tw-scale-x:1;--tw-scale-y:1;--tw-pan-x: ;--tw-pan-y: ;--tw-pinch-zoom: ;--tw-scroll-snap-strictness:proximity;--tw-gradient-from-position: ;--tw-gradient-via-position: ;--tw-gradient-to-position: ;--tw-ordinal: ;--tw-slashed-zero: ;--tw-numeric-figure: ;--tw-numeric-spacing: ;--tw-numeric-fraction: ;--tw-ring-inset: ;--tw-ring-offset-width:0px;--tw-ring-offset-color:#fff;--tw-ring-color:rgb(59 130 246 / 0.5);--tw-ring-offset-shadow:0 0 #0000;--tw-ring-shadow:0 0 #0000;--tw-shadow:0 0 #0000;--tw-shadow-colored:0 0 #0000;--tw-blur: ;--tw-brightness: ;--tw-contrast: ;--tw-grayscale: ;--tw-hue-rotate: ;--tw-invert: ;--tw-saturate: ;--tw-sepia: ;--tw-drop-shadow: ;--tw-backdrop-blur: ;--tw-backdrop-brightness: ;--tw-backdrop-contrast: ;--tw-backdrop-grayscale: ;--tw-backdrop-hue-rotate: ;--tw-backdrop-invert: ;--tw-backdrop-opacity: ;--tw-backdrop-saturate: ;--tw-backdrop-sepia: ;--tw-contain-size: ;--tw-contain-layout: ;--tw-contain-paint: ;--tw-contain-style: }/* ! tailwindcss v3.4.17 | MIT License | https://tailwindcss.com */*,::after,::before{box-sizing:border-box;border-width:0;border-style:solid;border-color:#e5e7eb}::after,::before{--tw-content:''}:host,html{line-height:1.5;-webkit-text-size-adjust:100%;-moz-tab-size:4;tab-size:4;font-family:ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";font-feature-settings:normal;font-variation-settings:normal;-webkit-tap-highlight-color:transparent}body{margin:0;line-height:inherit}hr{height:0;color:inherit;border-top-width:1px}abbr:where([title]){-webkit-text-decoration:underline dotted;text-decoration:underline dotted}h1,h2,h3,h4,h5,h6{font-size:inherit;font-weight:inherit}a{color:inherit;text-decoration:inherit}b,strong{font-weight:bolder}code,kbd,pre,samp{font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;font-feature-settings:normal;font-variation-settings:normal;font-size:1em}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}table{text-indent:0;border-color:inherit;border-collapse:collapse}button,input,optgroup,select,textarea{font-family:inherit;font-feature-settings:inherit;font-variation-settings:inherit;font-size:100%;font-weight:inherit;line-height:inherit;letter-spacing:inherit;color:inherit;margin:0;padding:0}button,select{text-transform:none}button,input:where([type=button]),input:where([type=reset]),input:where([type=submit]){-webkit-appearance:button;background-color:transparent;background-image:none}:-moz-focusring{outline:auto}:-moz-ui-invalid{box-shadow:none}progress{vertical-align:baseline}::-webkit-inner-spin-button,::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}blockquote,dd,dl,figure,h1,h2,h3,h4,h5,h6,hr,p,pre{margin:0}fieldset{margin:0;padding:0}legend{padding:0}menu,ol,ul{list-style:none;margin:0;padding:0}dialog{padding:0}textarea{resize:vertical}input::placeholder,textarea::placeholder{opacity:1;color:#9ca3af}[role=button],button{cursor:pointer}:disabled{cursor:default}audio,canvas,embed,iframe,img,object,svg,video{display:block;vertical-align:middle}img,video{max-width:100%;height:auto}[hidden]:where(:not([hidden=until-found])){display:none}.fixed{position:fixed}.absolute{position:absolute}.relative{position:relative}.inset-0{inset:0px}.z-40{z-index:40}.z-50{z-index:50}.mx-auto{margin-left:auto;margin-right:auto}.mt-2{margin-top:0.5rem}.mt-3{margin-top:0.75rem}.mt-4{margin-top:1rem}.mt-5{margin-top:1.25rem}.mt-6{margin-top:1.5rem}.block{display:block}.flex{display:flex}.inline-flex{display:inline-flex}.grid{display:grid}.hidden{display:none}.h-2{height:0.5rem}.h-36{height:9rem}.h-4{height:1rem}.h-5{height:1.25rem}.min-h-screen{min-height:100vh}.w-4{width:1rem}.w-5{width:1.25rem}.w-full{width:100%}.min-w-\[160px\]{min-width:160px}.max-w-6xl{max-width:72rem}.max-w-sm{max-width:24rem}.max-w-xl{max-width:36rem}.cursor-pointer{cursor:pointer}.grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.flex-col{flex-direction:column}.flex-wrap{flex-wrap:wrap}.items-center{align-items:center}.justify-center{justify-content:center}.justify-between{justify-content:space-between}.gap-1{gap:0.25rem}.gap-2{gap:0.5rem}.gap-3{gap:0.75rem}.gap-4{gap:1rem}.gap-6{gap:1.5rem}.space-y-2 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.5rem * var(--tw-space-y-reverse))}.space-y-3 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(0.75rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(0.75rem * var(--tw-space-y-reverse))}.space-y-4 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1rem * var(--tw-space-y-reverse))}.space-y-6 > :not([hidden]) ~ :not([hidden]){--tw-space-y-reverse:0;margin-top:calc(1.5rem * calc(1 - var(--tw-space-y-reverse)));margin-bottom:calc(1.5rem * var(--tw-space-y-reverse))}.rounded-2xl{border-radius:1rem}.rounded-full{border-radius:9999px}.rounded-xl{border-radius:0.75rem}.border{border-width:1px}.\!border-midnight\/20{border-color:rgb(28 28 46 / 0.2) !important}.border-coral\/40{border-color:rgb(242 181 167 / 0.4)}.border-harbor\/20{border-color:rgb(58 80 107 / 0.2)}.border-harbor\/30{border-color:rgb(58 80 107 / 0.3)}.border-midnight\/10{border-color:rgb(28 28 46 / 0.1)}.border-midnight\/20{border-color:rgb(28 28 46 / 0.2)}.bg-linen\/80{background-color:rgb(245 241 234 / 0.8)}.bg-linen\/95{background-color:rgb(245 241 234 / 0.95)}.bg-midnight{--tw-bg-opacity:1;background-color:rgb(28 28 46 / var(--tw-bg-opacity, 1))}.bg-midnight\/30{background-color:rgb(28 28 46 / 0.3)}.bg-mist{--tw-bg-opacity:1;background-color:rgb(234 234 234 / var(--tw-bg-opacity, 1))}.bg-mist\/90{background-color:rgb(234 234 234 / 0.9)}.bg-tide\/20{background-color:rgb(91 192 190 / 0.2)}.bg-white\/60{background-color:rgb(255 255 255 / 0.6)}.bg-white\/70{background-color:rgb(255 255 255 / 0.7)}.bg-white\/80{background-color:rgb(255 255 255 / 0.8)}.bg-white\/90{background-color:rgb(255 255 255 / 0.9)}.bg-tide\/15{background-color:rgb(91 192 190 / 0.15)}.bg-white{--tw-bg-opacity:1;background-color:rgb(255 255 255 / var(--tw-bg-opacity, 1))}.bg-coral\/15{background-color:rgb(242 181 167 / 0.15)}.p-1{padding:0.25rem}.p-3{padding:0.75rem}.p-4{padding:1rem}.px-3{padding-left:0.75rem;padding-right:0.75rem}.px-4{padding-left:1rem;padding-right:1rem}.px-5{padding-left:1.25rem;padding-right:1.25rem}.py-1{padding-top:0.25rem;padding-bottom:0.25rem}.py-2{padding-top:0.5rem;padding-bottom:0.5rem}.py-3{padding-top:0.75rem;padding-bottom:0.75rem}.py-6{padding-top:1.5rem;padding-bottom:1.5rem}.text-center{text-align:center}.text-2xl{font-size:1.5rem;line-height:2rem}.text-\[10px\]{font-size:10px}.text-\[11px\]{font-size:11px}.text-lg{font-size:1.125rem;line-height:1.75rem}.text-sm{font-size:0.875rem;line-height:1.25rem}.text-xl{font-size:1.25rem;line-height:1.75rem}.text-xs{font-size:0.75rem;line-height:1rem}.font-bold{font-weight:700}.font-semibold{font-weight:600}.uppercase{text-transform:uppercase}.tracking-\[0\.3em\]{letter-spacing:0.3em}.tracking-wide{letter-spacing:0.025em}.text-coral{--tw-text-opacity:1;color:rgb(242 181 167 / var(--tw-text-opacity, 1))}.text-harbor{--tw-text-opacity:1;color:rgb(58 80 107 / var(--tw-text-opacity, 1))}.text-midnight{--tw-text-opacity:1;color:rgb(28 28 46 / var(--tw-text-opacity, 1))}.text-tide{--tw-text-opacity:1;color:rgb(91 192 190 / var(--tw-text-opacity, 1))}.text-white{--tw-text-opacity:1;color:rgb(255 255 255 / var(--tw-text-opacity, 1))}.accent-midnight{accent-color:#1c1c2e}.transition{transition-property:color, background-color, border-color, fill, stroke, opacity, box-shadow, transform, filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;transition-property:color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter, -webkit-text-decoration-color, -webkit-backdrop-filter;transition-timing-function:cubic-bezier(0.4, 0, 0.2, 1);transition-duration:150ms}.hover\:border-coral:hover{--tw-border-opacity:1;border-color:rgb(242 181 167 / var(--tw-border-opacity, 1))}.hover\:border-harbor:hover{--tw-border-opacity:1;border-color:rgb(58 80 107 / var(--tw-border-opacity, 1))}.hover\:border-midnight:hover{--tw-border-opacity:1;border-color:rgb(28 28 46 / var(--tw-border-opacity, 1))}.hover\:bg-harbor:hover{--tw-bg-opacity:1;background-color:rgb(58 80 107 / var(--tw-bg-opacity, 1))}.hover\:text-midnight:hover{--tw-text-opacity:1;color:rgb(28 28 46 / var(--tw-text-opacity, 1))}.focus\:border-tide:focus{--tw-border-opacity:1;border-color:rgb(91 192 190 / var(--tw-border-opacity, 1))}.focus\:outline-none:focus{outline:2px solid transparent;outline-offset:2px}@media (min-width: 640px){.sm\:h-40{height:10rem}.sm\:grid-cols-2{grid-template-columns:repeat(2, minmax(0, 1fr))}.sm\:flex-row{flex-direction:row}.sm\:items-end{align-items:flex-end}.sm\:items-center{align-items:center}.sm\:justify-between{justify-content:space-between}.sm\:p-5{padding:1.25rem}.sm\:px-6{padding-left:1.5rem;padding-right:1.5rem}.sm\:py-10{padding-top:2.5rem;padding-bottom:2.5rem}.sm\:text-4xl{font-size:2.25rem;line-height:2.5rem}}@media (min-width: 1024px){.lg\:grid-cols-\[minmax\(0\2c 1\.15fr\)_minmax\(0\2c 0\.85fr\)\]{grid-template-columns:minmax(0,1.15fr) minmax(0,0.85fr)}}</style><script src="https://www.googletagmanager.com/gtag/js?l=dataLayer&amp;id=G-9MMCBQCT8Z" async=""></script></head>
+  <body class="bg-mist text-midnight">
+    <div id="authGate" class="fixed inset-0 z-50 items-center justify-center bg-mist/90 p-4 hidden">
+      <div class="card w-full max-w-sm border-midnight/10 bg-linen/95 p-4 sm:p-5">
+        <h2 class="text-xl font-semibold text-midnight">Bentornata</h2>
+        <p class="mt-2 text-xs text-harbor">
+          Accedi con email o Google per ritrovare il tuo spazio personale.
         </p>
-        <label class="mt-4 block text-xs uppercase tracking-wide text-slate-500">
+        <label class="mt-4 block text-xs uppercase tracking-wide text-harbor">
           Email
-          <input id="authEmail" type="email" autocomplete="email" class="mt-2 w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-sm focus:border-tropical-teal focus:outline-none">
+          <input id="authEmail" type="email" autocomplete="email" class="mt-2 w-full rounded-xl border border-harbor/20 bg-white/90 px-3 py-2 text-sm focus:border-tide focus:outline-none">
         </label>
-        <label class="mt-3 block text-xs uppercase tracking-wide text-slate-500">
+        <label class="mt-3 block text-xs uppercase tracking-wide text-harbor">
           Password
-          <input id="authPassword" type="password" autocomplete="current-password" class="mt-2 w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-sm focus:border-tropical-teal focus:outline-none">
+          <input id="authPassword" type="password" autocomplete="current-password" class="mt-2 w-full rounded-xl border border-harbor/20 bg-white/90 px-3 py-2 text-sm focus:border-tide focus:outline-none">
         </label>
         <div class="mt-4 grid gap-2 sm:grid-cols-2">
-          <button id="signInBtn" class="rounded-xl bg-cerulean px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-tropical-teal">
+          <button id="signInBtn" class="rounded-xl bg-midnight px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-harbor">
             Accedi
           </button>
-          <button id="signUpBtn" class="rounded-xl border border-cerulean/30 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-cerulean transition hover:border-cerulean">
+          <button id="signUpBtn" class="rounded-xl border border-harbor/30 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-harbor transition hover:border-harbor">
             Crea account
           </button>
         </div>
-        <button id="googleSignInBtn" class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 transition hover:border-cerulean">
-          <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-tropical-teal/15 text-[10px] font-bold text-tropical-teal">
+        <button id="googleSignInBtn" class="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-harbor/20 bg-white/90 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-harbor transition hover:border-midnight">
+          <span class="inline-flex h-5 w-5 items-center justify-center rounded-full bg-tide/20 text-[10px] font-bold text-tide">
             G
           </span>
           Accedi con Google
         </button>
-        <div id="authError" class="mt-3 text-[11px] text-vibrant-coral">Sincronizzazione cloud non riuscita. Riprova.</div>
+        <div id="authError" class="mt-3 text-[11px] text-coral">Sincronizzazione cloud non riuscita. Riprova.</div>
       </div>
     </div>
 
-    <div id="appShell" class="min-h-screen grid-background">
+    <div id="appShell" class="min-h-screen ambient-background">
       <div class="mx-auto max-w-6xl px-4 py-6 sm:px-6 sm:py-10">
         <header class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div class="space-y-2">
-            <div class="inline-flex items-center gap-2 rounded-full border border-cerulean/30 bg-white/80 px-3 py-1 text-xs uppercase tracking-[0.2em] text-cerulean">
-              ciclo tracker
+          <div class="space-y-3">
+            <div class="inline-flex items-center gap-2 rounded-full border border-midnight/10 bg-linen/80 px-3 py-1 text-[10px] uppercase tracking-[0.3em] text-harbor">
+              spazio ciclo
             </div>
-            <h1 class="text-2xl font-semibold text-slate-900 sm:text-4xl">
-              Gestione ciclo con due modalita
+            <h1 class="text-2xl font-semibold text-midnight sm:text-4xl">
+              Un luogo intimo per ascoltare il tuo ritmo.
             </h1>
-            <p class="max-w-xl text-sm text-slate-600">
-              Previsioni basate su media cicli, fase luteale e finestra fertile. Usa
-              la modalita adatta al tuo obiettivo.
+            <p class="max-w-xl text-sm text-harbor">
+              Non solo numeri: qui annoti emozioni, corpo e piccoli segnali per sentirti piu presente.
             </p>
           </div>
-          <div class="flex flex-col gap-2 sm:items-end">
-            <div class="rounded-2xl border border-cerulean/20 bg-white/80 px-4 py-3 text-xs text-slate-600">
-              Oggi: <span id="todayLabel" class="font-semibold text-slate-700">16 Mar 2026</span>
+          <div class="flex flex-col gap-3 sm:items-end">
+            <div class="rounded-2xl border border-midnight/10 bg-linen/80 px-4 py-3 text-xs text-harbor">
+              Oggi: <span id="todayLabel" class="font-semibold text-midnight">16 Mar 2026</span>
             </div>
-            <div id="authStatus" class="items-center gap-2 text-xs text-slate-600 flex">
-              <span id="authUser" class="rounded-full border border-cerulean/20 bg-white/80 px-3 py-1">minanardo94@gmail.com</span>
-              <button id="signOutBtn" class="rounded-full border border-cerulean/30 bg-white/70 px-3 py-1 font-semibold uppercase tracking-wide text-cerulean hover:border-cerulean">
+            <div id="authStatus" class="items-center gap-2 text-xs text-harbor flex">
+              <span id="authUser" class="rounded-full border border-midnight/10 bg-linen/80 px-3 py-1">minanardo94@gmail.com</span>
+              <button id="signOutBtn" class="rounded-full border border-midnight/20 bg-white/70 px-3 py-1 font-semibold uppercase tracking-wide text-midnight hover:border-midnight">
                 Esci
               </button>
             </div>
           </div>
         </header>
 
-        <main class="mt-6 grid gap-4 sm:mt-8 sm:gap-6 lg:grid-cols-[360px_minmax(0,1fr)]">
+        <main class="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
           <section class="space-y-6">
             <div class="card fade-up delay-1 p-4 sm:p-5">
-              <h2 class="text-lg font-semibold text-slate-900">Storico cicli</h2>
-              <p class="mt-2 text-xs text-slate-500">
-                Inserisci le durate dei cicli passati o usa il calendario: la media viene calcolata in automatico.
-              </p>
-              <div class="mt-4 flex gap-2">
-                <input id="historyInput" type="number" min="20" max="45" placeholder="es. 29" class="w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-tropical-teal focus:outline-none">
-                <button id="addHistory" class="rounded-xl bg-cerulean px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-tropical-teal">
-                  Aggiungi
-                </button>
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 class="text-xl font-semibold text-midnight">Bentornata</h2>
+                  <p class="text-sm text-harbor">Come si sente il tuo corpo oggi?</p>
+                </div>
+                <div class="text-xs text-harbor">Seleziona una giornata dall'orbita.</div>
               </div>
-              <div id="historyList" class="mt-4 flex flex-wrap gap-2"><div class="flex items-center gap-2 rounded-full border border-cerulean/20 bg-white px-3 py-1 text-xs text-slate-600">27 giorni</div><div class="flex items-center gap-2 rounded-full border border-cerulean/20 bg-white px-3 py-1 text-xs text-slate-600">32 giorni</div><div class="flex items-center gap-2 rounded-full border border-cerulean/20 bg-white px-3 py-1 text-xs text-slate-600">29 giorni</div><div class="flex items-center gap-2 rounded-full border border-cerulean/20 bg-white px-3 py-1 text-xs text-slate-600">30 giorni</div></div>
-              <div class="mt-4 flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2 text-xs text-slate-600">
-                <span>Media calcolata</span>
-                <span id="historyAverage" class="font-semibold text-slate-700">30 giorni</span>
+              <div class="mt-5 space-y-4">
+                <div>
+                  <div class="text-xs uppercase tracking-wide text-harbor">Energia</div>
+                  <div class="mt-2 flex flex-wrap gap-2 check-group" data-field="energy">
+                    <button class="pill px-3 py-1 text-xs" data-value="low">Bassa</button>
+                    <button class="pill px-3 py-1 text-xs" data-value="steady">Stabile</button>
+                    <button class="pill px-3 py-1 text-xs" data-value="high">Alta</button>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wide text-harbor">Umore</div>
+                  <div class="mt-2 flex flex-wrap gap-2 check-group" data-field="mood">
+                    <button class="pill px-3 py-1 text-xs" data-value="calm">Calmo</button>
+                    <button class="pill px-3 py-1 text-xs" data-value="bright">Luminoso</button>
+                    <button class="pill px-3 py-1 text-xs" data-value="sensitive">Sensibile</button>
+                  </div>
+                </div>
+                <div>
+                  <div class="text-xs uppercase tracking-wide text-harbor">Sensazioni</div>
+                  <div class="mt-2 flex flex-wrap gap-2 check-group" data-field="sensation">
+                    <button class="pill px-3 py-1 text-xs" data-value="light">Leggera</button>
+                    <button class="pill px-3 py-1 text-xs" data-value="tension">Tensione</button>
+                    <button class="pill px-3 py-1 text-xs" data-value="cramps">Crampi</button>
+                  </div>
+                </div>
               </div>
-              <button id="clearHistory" class="mt-3 text-xs font-semibold uppercase tracking-wide text-slate-500 hover:text-slate-700">
-                Svuota storico
-              </button>
             </div>
 
             <div class="card fade-up delay-2 p-4 sm:p-5">
-              <h2 class="text-lg font-semibold text-slate-900">Modalita</h2>
-              <div class="mt-4 rounded-full border border-cerulean/20 bg-white/80 p-1">
-                <div class="grid grid-cols-2 gap-1" id="modeToggle">
-                  <button data-mode="conception" class="mode-btn rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide bg-cerulean text-white">
-                    Cerca di concepire
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 class="text-lg font-semibold text-midnight">Il ciclo come orbita</h2>
+                  <p class="text-xs text-harbor">Tocca un segmento per entrare in quel giorno.</p>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <button id="prevMonth" class="rounded-full border border-midnight/10 bg-white/80 px-3 py-1 font-semibold text-midnight hover:border-midnight">
+                    Indietro
                   </button>
-                  <button data-mode="contraception" class="mode-btn rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600">
-                    Contraccezione naturale
+                  <div id="monthLabel" class="min-w-[160px] text-center text-sm font-semibold text-harbor">14 Mar 2026 • 10 Apr 2026</div>
+                  <button id="nextMonth" class="rounded-full border border-midnight/10 bg-white/80 px-3 py-1 font-semibold text-midnight hover:border-midnight">
+                    Avanti
                   </button>
                 </div>
               </div>
-              <div class="mt-4 space-y-2 text-xs text-slate-600" id="modeHelp"><div class="rounded-xl bg-tropical-teal/10 px-3 py-2">Evidenziamo la finestra fertile con segnali turchesi per favorire il concepimento.</div></div>
-            </div>
-
-            <div class="card fade-up delay-3 p-4 sm:p-5">
-              <h2 class="text-lg font-semibold text-slate-900">Log giornaliero</h2>
-              <div class="mt-2 text-xs text-slate-500">Seleziona un giorno nel calendario.</div>
-              <div class="mt-4 rounded-xl bg-slate-50 px-3 py-2 text-sm font-semibold text-slate-700" id="logDate">16 Nov 2025</div>
-              <div class="mt-4 space-y-4 text-sm text-slate-700">
-                <label class="flex items-center justify-between rounded-xl border border-slate-200 bg-white/80 px-3 py-2">
-                  <span>Rapporti sessuali</span>
-                  <input id="logSex" type="checkbox" class="h-4 w-4 accent-cerulean">
-                </label>
-                <label class="block">
-                  <span class="text-xs uppercase tracking-wide text-slate-500">Muco cervicale</span>
-                  <input id="logMucus" type="text" placeholder="Note rapide" class="mt-2 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-tropical-teal focus:outline-none">
-                </label>
-                <label class="block">
-                  <span class="text-xs uppercase tracking-wide text-slate-500">Temperatura basale (C)</span>
-                  <input id="logTemp" type="number" step="0.1" placeholder="36.5" class="mt-2 w-full rounded-xl border border-slate-200 bg-white/80 px-3 py-2 text-sm focus:border-tropical-teal focus:outline-none">
-                </label>
+              <div class="mt-6">
+                <div class="orbit">
+                  <div id="calendarGrid" class="orbit-segments"><button data-date="2026-03-14" class="orbit-segment phase-menses is-menses" title="14 Mar 2026 · Mestruazione" style="--angle: 0deg;"></button><button data-date="2026-03-15" class="orbit-segment phase-menses is-menses" title="15 Mar 2026 · Mestruazione" style="--angle: 12.857142857142858deg;"></button><button data-date="2026-03-16" class="orbit-segment phase-menses is-menses is-today" title="16 Mar 2026 · Mestruazione" style="--angle: 25.714285714285715deg;"></button><button data-date="2026-03-17" class="orbit-segment phase-menses is-menses" title="17 Mar 2026 · Mestruazione" style="--angle: 38.57142857142857deg;"></button><button data-date="2026-03-18" class="orbit-segment phase-menses is-menses" title="18 Mar 2026 · Mestruazione" style="--angle: 51.42857142857143deg;"></button><button data-date="2026-03-19" class="orbit-segment phase-follicular" title="19 Mar 2026" style="--angle: 64.28571428571429deg;"></button><button data-date="2026-03-20" class="orbit-segment phase-follicular" title="20 Mar 2026" style="--angle: 77.14285714285714deg;"></button><button data-date="2026-03-21" class="orbit-segment phase-follicular" title="21 Mar 2026" style="--angle: 90deg;"></button><button data-date="2026-03-22" class="orbit-segment phase-follicular is-risk is-margin" title="22 Mar 2026 · Giorno a rischio" style="--angle: 102.85714285714286deg;"></button><button data-date="2026-03-23" class="orbit-segment phase-follicular is-risk is-margin" title="23 Mar 2026 · Giorno a rischio" style="--angle: 115.71428571428572deg;"></button><button data-date="2026-03-24" class="orbit-segment phase-follicular is-risk is-margin" title="24 Mar 2026 · Giorno a rischio" style="--angle: 128.57142857142858deg;"></button><button data-date="2026-03-25" class="orbit-segment phase-follicular is-risk" title="25 Mar 2026 · Finestra fertile · Giorno a rischio" style="--angle: 141.42857142857144deg;"></button><button data-date="2026-03-26" class="orbit-segment phase-follicular is-risk" title="26 Mar 2026 · Finestra fertile · Giorno a rischio" style="--angle: 154.28571428571428deg;"></button><button data-date="2026-03-27" class="orbit-segment phase-follicular is-risk" title="27 Mar 2026 · Finestra fertile · Giorno a rischio" style="--angle: 167.14285714285714deg;"></button><button data-date="2026-03-28" class="orbit-segment phase-follicular is-risk" title="28 Mar 2026 · Finestra fertile · Giorno a rischio" style="--angle: 180deg;"></button><button data-date="2026-03-29" class="orbit-segment phase-follicular is-risk" title="29 Mar 2026 · Finestra fertile · Giorno a rischio" style="--angle: 192.85714285714286deg;"></button><button data-date="2026-03-30" class="orbit-segment phase-ovulation is-ovulation is-risk" title="30 Mar 2026 · Finestra fertile · Ovulazione · Giorno a rischio" style="--angle: 205.71428571428572deg;"></button><button data-date="2026-03-31" class="orbit-segment phase-luteal is-risk" title="31 Mar 2026 · Finestra fertile · Giorno a rischio" style="--angle: 218.57142857142858deg;"></button><button data-date="2026-04-01" class="orbit-segment phase-luteal is-risk is-margin" title="01 Apr 2026 · Giorno a rischio" style="--angle: 231.42857142857144deg;"></button><button data-date="2026-04-02" class="orbit-segment phase-luteal is-risk is-margin" title="02 Apr 2026 · Giorno a rischio" style="--angle: 244.2857142857143deg;"></button><button data-date="2026-04-03" class="orbit-segment phase-luteal is-risk is-margin" title="03 Apr 2026 · Giorno a rischio" style="--angle: 257.14285714285717deg;"></button><button data-date="2026-04-04" class="orbit-segment phase-luteal" title="04 Apr 2026" style="--angle: 270deg;"></button><button data-date="2026-04-05" class="orbit-segment phase-luteal" title="05 Apr 2026" style="--angle: 282.8571428571429deg;"></button><button data-date="2026-04-06" class="orbit-segment phase-luteal" title="06 Apr 2026" style="--angle: 295.7142857142857deg;"></button><button data-date="2026-04-07" class="orbit-segment phase-luteal" title="07 Apr 2026" style="--angle: 308.57142857142856deg;"></button><button data-date="2026-04-08" class="orbit-segment phase-luteal" title="08 Apr 2026" style="--angle: 321.42857142857144deg;"></button><button data-date="2026-04-09" class="orbit-segment phase-luteal" title="09 Apr 2026" style="--angle: 334.2857142857143deg;"></button><button data-date="2026-04-10" class="orbit-segment phase-luteal" title="10 Apr 2026" style="--angle: 347.14285714285717deg;"></button></div>
+                  <div class="orbit-core">
+                    <div class="space-y-2">
+                      <div id="orbitDayLabel" class="text-lg font-semibold text-midnight">Giorno 3</div>
+                      <div id="orbitDateLabel" class="text-xs text-harbor">16 Nov 2025</div>
+                      <div id="orbitPhaseLabel" class="text-xs uppercase tracking-wide text-harbor">mestruazione</div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <button id="clearLog" class="mt-4 text-xs font-semibold uppercase tracking-wide text-slate-500 hover:text-slate-700">
-                Cancella log del giorno
-              </button>
+              <div class="mt-5 flex flex-wrap gap-3 text-[11px] text-harbor">
+                <span class="inline-flex items-center gap-2">
+                  <span class="h-2 w-5 rounded-full" style="background: var(--phase-menstrual);"></span>
+                  Mestruazione
+                </span>
+                <span class="inline-flex items-center gap-2">
+                  <span class="h-2 w-5 rounded-full" style="background: var(--phase-follicular);"></span>
+                  Follicolare
+                </span>
+                <span class="inline-flex items-center gap-2">
+                  <span class="h-2 w-5 rounded-full" style="background: var(--phase-ovulation);"></span>
+                  Ovulazione
+                </span>
+                <span class="inline-flex items-center gap-2">
+                  <span class="h-2 w-5 rounded-full" style="background: var(--phase-luteal);"></span>
+                  Luteale
+                </span>
+              </div>
             </div>
 
             <div class="card fade-up delay-3 p-4 sm:p-5">
-              <h2 class="text-lg font-semibold text-slate-900">Salvataggio dati</h2>
-              <p class="mt-2 text-xs text-slate-500">
-                Su GitHub Pages non e possibile salvare file nel repository. Usa esporta e importa
-                per il backup locale.
-              </p>
-              <div class="mt-4 grid gap-3 sm:grid-cols-2">
-                <button id="exportData" class="rounded-xl bg-cerulean px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-tropical-teal">
-                  Esporta JSON
+              <h2 class="text-lg font-semibold text-midnight">Scrivi come ti senti</h2>
+              <p class="text-xs text-harbor">Un pensiero breve, solo per te.</p>
+              <textarea id="journalInput" rows="4" placeholder="Scrivi qui..." class="mt-4 w-full rounded-2xl border border-midnight/10 bg-white/80 px-4 py-3 text-sm focus:border-tide focus:outline-none"></textarea>
+              <div class="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <button id="journalSave" class="rounded-full bg-midnight px-5 py-2 text-xs font-semibold uppercase tracking-wide text-white hover:bg-harbor">
+                  Salva il momento
                 </button>
-                <label class="flex cursor-pointer items-center justify-center rounded-xl border border-slate-200 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-800">
-                  Importa JSON
-                  <input id="importData" type="file" accept="application/json" class="hidden">
-                </label>
+                <span id="journalStatus" class="text-[11px] text-harbor"></span>
               </div>
-              <div class="mt-3 text-[11px] text-slate-500">Salvataggio automatico in localStorage.</div>
+            </div>
+
+            <div class="card fade-up delay-3 p-4 sm:p-5">
+              <h2 class="text-lg font-semibold text-midnight">Suggerimenti per il corpo</h2>
+              <p class="text-xs text-harbor">Piccoli gesti per sostenerti oggi.</p>
+              <ul id="bodySuggestions" class="mt-4 flex flex-col gap-2 text-sm text-midnight"><li class="rounded-2xl border border-midnight/10 bg-white/80 px-3 py-2 text-sm text-midnight">Riposo gentile</li><li class="rounded-2xl border border-midnight/10 bg-white/80 px-3 py-2 text-sm text-midnight">Idratazione costante</li><li class="rounded-2xl border border-midnight/10 bg-white/80 px-3 py-2 text-sm text-midnight">Calore sul ventre</li></ul>
             </div>
           </section>
 
           <section class="space-y-6">
-            <div class="card fade-up p-4 sm:p-5">
-              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 class="text-lg font-semibold text-slate-900">Calendario dinamico</h2>
-                  <p class="text-xs text-slate-500">Finestra fertile, ovulazione e mestruazione prevista.</p>
-                </div>
-                <div class="flex items-center gap-2">
-                  <button id="prevMonth" class="rounded-full border border-cerulean/20 bg-white/80 px-3 py-1 text-sm font-semibold text-cerulean hover:text-slate-900">
-                    Prev
-                  </button>
-                  <div id="monthLabel" class="min-w-[140px] text-center text-sm font-semibold text-slate-700">Mar 2026</div>
-                  <button id="nextMonth" class="rounded-full border border-cerulean/20 bg-white/80 px-3 py-1 text-sm font-semibold text-cerulean hover:text-slate-900">
-                    Next
-                  </button>
-                </div>
-              </div>
-
-              <div class="mt-4 grid grid-cols-7 gap-1.5 text-center text-xs uppercase tracking-wide text-slate-400 sm:gap-2">
-                <div>Lun</div>
-                <div>Mar</div>
-                <div>Mer</div>
-                <div>Gio</div>
-                <div>Ven</div>
-                <div>Sab</div>
-                <div>Dom</div>
-              </div>
-              <div id="calendarGrid" class="mt-3 grid grid-cols-7 gap-1.5 sm:gap-2"><button data-date="2026-02-23" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">23</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-02-24" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">24</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-02-25" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">25</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-02-26" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">26</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-02-27" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">27</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-02-28" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile | Ovulazione stimata"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">28</span>
-              <span class="flex items-center gap-1">
-                
-            <span class="text-cerulean">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 1.8 4.2 4.2 1.8-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3Z"></path>
-              </svg>
-            </span>
-          
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-01" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">1</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-02" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">2</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-03" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">3</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-04" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">4</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-05" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">5</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-06" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">6</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-07" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">7</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-08" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">8</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-09" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">9</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-10" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">10</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-11" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">11</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-12" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">12</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-13" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">13</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-14" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-soft-apricot/70" title="Mestruazione prevista"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">14</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div><div class="mt-2 h-1 w-full rounded-full bg-soft-apricot"></div></button><button data-date="2026-03-15" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-soft-apricot/70" title="Mestruazione prevista"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">15</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div><div class="mt-2 h-1 w-full rounded-full bg-soft-apricot"></div></button><button data-date="2026-03-16" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-soft-apricot/70 ring-1 ring-cerulean/30" title="Mestruazione prevista"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">16</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div><div class="mt-2 h-1 w-full rounded-full bg-soft-apricot"></div></button><button data-date="2026-03-17" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-soft-apricot/70" title="Mestruazione prevista"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">17</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div><div class="mt-2 h-1 w-full rounded-full bg-soft-apricot"></div></button><button data-date="2026-03-18" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-soft-apricot/70" title="Mestruazione prevista"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">18</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div><div class="mt-2 h-1 w-full rounded-full bg-soft-apricot"></div></button><button data-date="2026-03-19" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">19</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-20" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">20</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-21" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">21</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-22" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">22</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-23" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">23</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-24" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">24</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-25" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">25</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-26" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">26</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-27" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">27</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-28" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">28</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-29" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">29</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-30" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile | Ovulazione stimata"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">30</span>
-              <span class="flex items-center gap-1">
-                
-            <span class="text-cerulean">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 1.8 4.2 4.2 1.8-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3Z"></path>
-              </svg>
-            </span>
-          
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-03-31" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/90 text-slate-700 border-slate-200/60 bg-tropical-teal/10 border-tropical-teal/40" title="Finestra fertile"><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">31</span>
-              <span class="flex items-center gap-1">
-                
-                
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z"></path>
-              </svg>
-            </span>
-          
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-04-01" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">1</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-04-02" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">2</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-04-03" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">3</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-04-04" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">4</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button><button data-date="2026-04-05" class="day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px] bg-white/50 text-slate-400 border-slate-200/60" title=""><div class="flex items-start justify-between">
-              <span class="text-sm font-semibold">5</span>
-              <span class="flex items-center gap-1">
-                
-                
-                
-              </span>
-            </div><div class="mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500"></div></button></div>
-
-              <div class="mt-5 grid gap-3 text-xs text-slate-600 sm:grid-cols-2">
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex h-2 w-6 rounded-full bg-soft-apricot"></span>
-                  <span>Mestruazione prevista</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex h-2 w-6 rounded-full bg-tropical-teal/40"></span>
-                  <span>Finestra fertile (concezione)</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex h-2 w-6 rounded-full bg-vibrant-coral/40"></span>
-                  <span>Giorni a rischio (contraccezione)</span>
-                </div>
-                <div class="flex items-center gap-2">
-                  <span class="inline-flex h-2 w-6 rounded-full bg-soft-apricot/70 ring-1 ring-vibrant-coral/30"></span>
-                  <span>Margine sicurezza</span>
-                </div>
+            <div class="card fade-up delay-1 p-4 sm:p-5">
+              <h2 class="text-lg font-semibold text-midnight">Il tuo compagno di viaggio</h2>
+              <p class="text-xs text-harbor">Si trasforma con le tue fasi.</p>
+              <div class="mt-4">
+                <div id="moodCreature" class="creature" data-phase="menses"></div>
+                <div id="creatureLabel" class="mt-4 text-center text-xs text-harbor">Si riposa, respira con te.</div>
               </div>
             </div>
 
-            <div class="card fade-up delay-1 p-4 sm:p-5">
-              <h2 class="text-lg font-semibold text-slate-900">Previsioni principali</h2>
-              <div class="mt-4 grid gap-3 text-sm text-slate-700">
+            <div class="card fade-up delay-2 p-4 sm:p-5">
+              <h2 class="text-lg font-semibold text-midnight">Ritmo e previsioni</h2>
+              <div class="mt-4 grid gap-3 text-sm text-harbor">
                 <div class="flex items-center justify-between">
-                  <span>Prossima mestruazione</span>
-                  <span id="nextPeriodLabel" class="font-semibold text-slate-800">13 Apr 2026</span>
+                  <span>Prossimo ciclo</span>
+                  <span id="nextPeriodLabel" class="font-semibold text-midnight">10 Apr 2026 - 16 Apr 2026</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span>Ovulazione stimata</span>
-                  <span id="ovulationLabel" class="font-semibold text-slate-800">30 Mar 2026</span>
+                  <span id="ovulationLabel" class="font-semibold text-midnight">30 Mar 2026</span>
                 </div>
                 <div class="flex items-center justify-between">
                   <span>Finestra fertile</span>
-                  <span id="fertileLabel" class="font-semibold text-slate-800">25 Mar 2026 - 31 Mar 2026</span>
+                  <span id="fertileLabel" class="font-semibold text-midnight">25 Mar 2026 - 31 Mar 2026</span>
                 </div>
               </div>
-              <div class="mt-4 rounded-2xl bg-soft-apricot/60 px-4 py-3 text-xs text-slate-700" id="predictionNote">Media calcolata: 29.5 giorni (usata 30). Deviazione standard: 2.1 giorni.</div>
-              <div class="mt-4 rounded-2xl bg-slate-50 px-4 py-3 text-xs text-slate-500">
-                Nota: le previsioni sono approssimative e non sostituiscono un parere medico.
+              <div class="mt-4 rounded-2xl bg-white/70 px-4 py-3 text-xs text-harbor" id="predictionNote">Media del tuo ritmo: 29.5 giorni (usata 30). Deviazione standard: 2.1 giorni. Margine sicurezza in contraccezione: +/- 3 giorni.</div>
+              <div class="mt-3 text-[11px] text-harbor">
+                Le previsioni sono indicative e non sostituiscono un parere medico.
               </div>
             </div>
 
-            <div class="card fade-up delay-2 p-4 sm:p-5 !border-cerulean/40">
-              <h2 class="text-lg font-semibold text-slate-900">Insights personalizzati</h2>
-              <p class="mt-2 text-xs text-slate-500">
-                Sintesi automatica dei pattern nei tuoi log e nello storico.
+            <div class="card fade-up delay-2 p-4 sm:p-5 !border-midnight/20">
+              <h2 class="text-lg font-semibold text-midnight">Insights personalizzati</h2>
+              <p class="mt-2 text-xs text-harbor">Pattern emersi da log e storico.</p>
+              <ul id="insightsList" class="mt-4 flex flex-col gap-2 text-xs text-midnight"><li class="rounded-full border border-midnight/10 bg-white/80 px-3 py-2 text-xs text-midnight">Regolarita: lieve variabilita. Con piu dati le stime saranno piu stabili.</li><li class="rounded-full border border-midnight/10 bg-white/80 px-3 py-2 text-xs text-midnight">Oggi sei in mestruazione (giorno 3): rischio basso, ma registra i sintomi.</li></ul>
+            </div>
+
+            <div class="card fade-up delay-2 p-4 sm:p-5">
+              <h2 class="text-lg font-semibold text-midnight">Riassunto settimanale</h2>
+              <p class="text-xs text-harbor">Un breve sguardo agli ultimi 7 giorni.</p>
+              <ul id="weeklyInsights" class="mt-4 flex flex-col gap-2 text-sm text-midnight"><li class="rounded-2xl border border-midnight/10 bg-white/80 px-3 py-2 text-sm text-midnight">Fase attuale: mestruazione.</li></ul>
+            </div>
+
+            <div class="card fade-up delay-2 p-4 sm:p-5">
+              <h2 class="text-lg font-semibold text-midnight">Cosa ti racconta il corpo oggi?</h2>
+              <div class="mt-2 text-xs text-harbor">Giorno selezionato: <span id="logDate">16 Nov 2025</span></div>
+              <div class="mt-4 space-y-4 text-sm text-midnight">
+                <label class="flex items-center justify-between rounded-2xl border border-midnight/10 bg-white/80 px-3 py-2">
+                  <span>Rapporti sessuali</span>
+                  <input id="logSex" type="checkbox" class="h-4 w-4 accent-midnight">
+                </label>
+                <label class="block">
+                  <span class="text-xs uppercase tracking-wide text-harbor">Muco cervicale</span>
+                  <input id="logMucus" type="text" placeholder="Scrivi una sensazione" class="mt-2 w-full rounded-xl border border-midnight/10 bg-white/80 px-3 py-2 text-sm focus:border-tide focus:outline-none">
+                </label>
+                <label class="block">
+                  <span class="text-xs uppercase tracking-wide text-harbor">Temperatura basale (C)</span>
+                  <input id="logTemp" type="number" step="0.1" placeholder="36.5" class="mt-2 w-full rounded-xl border border-midnight/10 bg-white/80 px-3 py-2 text-sm focus:border-tide focus:outline-none">
+                </label>
+              </div>
+              <button id="clearLog" class="mt-4 text-xs font-semibold uppercase tracking-wide text-harbor hover:text-midnight">
+                Cancella la giornata
+              </button>
+            </div>
+
+            <div class="card fade-up delay-3 p-4 sm:p-5">
+              <h2 class="text-lg font-semibold text-midnight">Memoria dei cicli</h2>
+              <p class="mt-2 text-xs text-harbor">
+                Aggiungi durate passate per affinare le previsioni.
               </p>
-              <ul id="insightsList" class="mt-4 flex flex-col gap-2 text-xs text-slate-700"><li class="rounded-full border border-cerulean/30 bg-white/80 px-3 py-2 text-xs text-slate-700">Regolarita: lieve variabilita. Con piu dati le stime saranno piu stabili.</li><li class="rounded-full border border-cerulean/30 bg-white/80 px-3 py-2 text-xs text-slate-700">Oggi sei in mestruazione (giorno 3): riposo e idratazione aiutano il recupero.</li></ul>
+              <div class="mt-4 flex gap-2">
+                <input id="historyInput" type="number" min="20" max="45" placeholder="es. 29" class="w-full rounded-xl border border-midnight/10 bg-white/80 px-3 py-2 text-sm focus:border-tide focus:outline-none">
+                <button id="addHistory" class="rounded-xl bg-midnight px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-harbor">
+                  Aggiungi
+                </button>
+              </div>
+              <div id="historyList" class="mt-4 flex flex-wrap gap-2"><div class="flex items-center gap-2 rounded-full border border-midnight/10 bg-white px-3 py-1 text-xs text-harbor">27 giorni</div><div class="flex items-center gap-2 rounded-full border border-midnight/10 bg-white px-3 py-1 text-xs text-harbor">32 giorni</div><div class="flex items-center gap-2 rounded-full border border-midnight/10 bg-white px-3 py-1 text-xs text-harbor">29 giorni</div><div class="flex items-center gap-2 rounded-full border border-midnight/10 bg-white px-3 py-1 text-xs text-harbor">30 giorni</div></div>
+              <div class="mt-4 flex items-center justify-between rounded-xl bg-white/60 px-3 py-2 text-xs text-harbor">
+                <span>Media calcolata</span>
+                <span id="historyAverage" class="font-semibold text-midnight">30 giorni</span>
+              </div>
+              <button id="clearHistory" class="mt-3 text-xs font-semibold uppercase tracking-wide text-harbor hover:text-midnight">
+                Svuota storico
+              </button>
+            </div>
+
+            <div class="card fade-up delay-3 p-4 sm:p-5">
+              <h2 class="text-lg font-semibold text-midnight">Modalita</h2>
+              <div class="mt-4 rounded-full border border-midnight/10 bg-white/80 p-1">
+                <div class="grid grid-cols-2 gap-1" id="modeToggle">
+                  <button data-mode="conception" class="mode-btn rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide text-harbor">
+                    Cercare una gravidanza
+                  </button>
+                  <button data-mode="contraception" class="mode-btn rounded-full px-3 py-2 text-xs font-semibold uppercase tracking-wide bg-midnight text-white">
+                    Proteggere il ciclo
+                  </button>
+                </div>
+              </div>
+              <div class="mt-4 space-y-2 text-xs text-harbor" id="modeHelp"><div class="rounded-xl bg-coral/15 px-3 py-2">Segnaliamo i giorni sensibili con attenzione extra e margine di sicurezza.</div></div>
             </div>
 
             <div class="card fade-up delay-3 p-4 sm:p-5">
               <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-slate-900">Andamento durate ciclo</h2>
-                <span class="text-[11px] uppercase tracking-wide text-slate-500">Ultimi cicli</span>
+                <h2 class="text-lg font-semibold text-midnight">Andamento durate</h2>
+                <span class="text-[11px] uppercase tracking-wide text-harbor">Ultimi cicli</span>
               </div>
-              <p class="mt-2 text-xs text-slate-500">Grafico delle ultime durate registrate.</p>
-              <div class="mt-4 rounded-2xl border border-cerulean/10 bg-white/80 p-3">
+              <p class="mt-2 text-xs text-harbor">Grafico delle ultime durate registrate.</p>
+              <div class="mt-4 rounded-2xl border border-midnight/10 bg-white/80 p-3">
                 <canvas id="cycleChart" height="320" class="h-36 w-full sm:h-40" width="640" style="width: 320px; height: 160px;"></canvas>
               </div>
-              <div id="cycleChartNote" class="mt-3 text-[11px] text-slate-500">Media 29.5 giorni · Range 27-32 giorni</div>
+              <div id="cycleChartNote" class="mt-3 text-[11px] text-harbor">Media 29.5 giorni · Range 27-32 giorni</div>
+            </div>
+
+            <div class="card fade-up delay-3 p-4 sm:p-5">
+              <h2 class="text-lg font-semibold text-midnight">Backup personale</h2>
+              <p class="mt-2 text-xs text-harbor">
+                Usa esporta e importa per portare con te questo spazio.
+              </p>
+              <div class="mt-4 grid gap-3 sm:grid-cols-2">
+                <button id="exportData" class="rounded-xl bg-midnight px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-harbor">
+                  Esporta JSON
+                </button>
+                <label class="flex cursor-pointer items-center justify-center rounded-xl border border-midnight/10 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-harbor hover:text-midnight">
+                  Importa JSON
+                  <input id="importData" type="file" accept="application/json" class="hidden">
+                </label>
+              </div>
+              <div class="mt-3 text-[11px] text-harbor">Salvataggio automatico su cloud e localStorage.</div>
             </div>
           </section>
         </main>
       </div>
 
       <div id="periodModal" class="fixed inset-0 z-40 hidden items-center justify-center p-4">
-      <div class="absolute inset-0 bg-slate-900/30" data-close="true"></div>
-      <div class="card relative w-full max-w-sm border-cerulean/30 bg-white/95 p-4 sm:p-5">
-        <h3 class="text-lg font-semibold text-slate-900">Registra mestruazione</h3>
-        <p class="mt-2 text-xs text-slate-500">
-          Seleziona la data di inizio del ciclo. Durata predefinita: 5 giorni.
-        </p>
-        <label class="mt-4 block text-xs uppercase tracking-wide text-slate-500">
-          Data inizio ciclo
-          <input id="periodStartInput" type="date" class="mt-2 w-full rounded-xl border border-slate-200 bg-white/90 px-3 py-2 text-sm focus:border-tropical-teal focus:outline-none">
-        </label>
-        <div id="periodHint" class="mt-3 text-[11px] text-slate-500"></div>
-        <div class="mt-4 grid gap-2 sm:grid-cols-2">
-          <button id="periodSave" class="rounded-xl bg-cerulean px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-tropical-teal">
-            Imposta inizio
-          </button>
-          <button id="periodClose" class="rounded-xl border border-vibrant-coral/40 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-vibrant-coral transition hover:border-vibrant-coral">
-            Chiudi ciclo qui
+        <div class="absolute inset-0 bg-midnight/30" data-close="true"></div>
+        <div class="card relative w-full max-w-sm border-midnight/10 bg-linen/95 p-4 sm:p-5">
+          <h3 class="text-lg font-semibold text-midnight">Segna l'inizio del ciclo</h3>
+          <p class="mt-2 text-xs text-harbor">
+            Scegli la data di inizio. Durata predefinita: 5 giorni.
+          </p>
+          <label class="mt-4 block text-xs uppercase tracking-wide text-harbor">
+            Data inizio ciclo
+            <input id="periodStartInput" type="date" class="mt-2 w-full rounded-xl border border-midnight/10 bg-white/90 px-3 py-2 text-sm focus:border-tide focus:outline-none">
+          </label>
+          <div id="periodHint" class="mt-3 text-[11px] text-harbor"></div>
+          <div class="mt-4 grid gap-2 sm:grid-cols-2">
+            <button id="periodSave" class="rounded-xl bg-midnight px-4 py-2 text-xs font-semibold uppercase tracking-wide text-white transition hover:bg-harbor">
+              Imposta inizio
+            </button>
+            <button id="periodClose" class="rounded-xl border border-coral/40 bg-white/80 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-coral transition hover:border-coral">
+              Chiudi ciclo qui
+            </button>
+          </div>
+          <button id="periodCancel" class="mt-3 w-full rounded-xl border border-midnight/10 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-harbor hover:text-midnight">
+            Annulla
           </button>
         </div>
-        <button id="periodCancel" class="mt-3 w-full rounded-xl border border-cerulean/20 bg-white/70 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-600 hover:text-slate-900">
-          Annulla
-        </button>
       </div>
-    </div>
     </div>
 
     <script type="module">
@@ -818,7 +663,7 @@
           },
           periods: [],
           logs: {},
-          viewMonth: formatYearMonth(today),
+          viewCycleOffset: 0,
           selectedDate: formatDateISO(today),
         };
 
@@ -860,8 +705,18 @@
           fertileLabel: document.getElementById("fertileLabel"),
           predictionNote: document.getElementById("predictionNote"),
           insightsList: document.getElementById("insightsList"),
+          weeklyInsights: document.getElementById("weeklyInsights"),
+          bodySuggestions: document.getElementById("bodySuggestions"),
           cycleChart: document.getElementById("cycleChart"),
           cycleChartNote: document.getElementById("cycleChartNote"),
+          orbitDayLabel: document.getElementById("orbitDayLabel"),
+          orbitDateLabel: document.getElementById("orbitDateLabel"),
+          orbitPhaseLabel: document.getElementById("orbitPhaseLabel"),
+          moodCreature: document.getElementById("moodCreature"),
+          creatureLabel: document.getElementById("creatureLabel"),
+          journalInput: document.getElementById("journalInput"),
+          journalSave: document.getElementById("journalSave"),
+          journalStatus: document.getElementById("journalStatus"),
           periodModal: document.getElementById("periodModal"),
           periodStartInput: document.getElementById("periodStartInput"),
           periodSave: document.getElementById("periodSave"),
@@ -873,6 +728,30 @@
         elements.todayLabel.textContent = formatDateLabel(today);
 
         initAuth();
+
+        document.querySelectorAll(".check-group").forEach((group) => {
+          group.addEventListener("click", (event) => {
+            const button = event.target.closest("button[data-value]");
+            if (!button) return;
+            const field = group.dataset.field;
+            const value = button.dataset.value;
+            if (!field) return;
+            const current = state.logs[state.selectedDate]?.[field] || "";
+            updateLog({ [field]: current === value ? "" : value });
+          });
+        });
+
+        if (elements.journalSave) {
+          elements.journalSave.addEventListener("click", () => {
+            const text = elements.journalInput?.value.trim() || "";
+            updateLog({ journal: text });
+            if (elements.journalStatus) {
+              elements.journalStatus.textContent = text
+                ? `Salvato alle ${formatTime(new Date())}`
+                : "Nota rimossa.";
+            }
+          });
+        }
 
         if (elements.signInBtn) {
           elements.signInBtn.addEventListener("click", () => {
@@ -947,17 +826,13 @@
         });
 
         elements.prevMonth.addEventListener("click", () => {
-          const viewDate = parseYearMonth(state.viewMonth);
-          viewDate.setMonth(viewDate.getMonth() - 1);
-          state.viewMonth = formatYearMonth(viewDate);
+          state.viewCycleOffset = Number(state.viewCycleOffset || 0) - 1;
           saveState();
           renderCalendar();
         });
 
         elements.nextMonth.addEventListener("click", () => {
-          const viewDate = parseYearMonth(state.viewMonth);
-          viewDate.setMonth(viewDate.getMonth() + 1);
-          state.viewMonth = formatYearMonth(viewDate);
+          state.viewCycleOffset = Number(state.viewCycleOffset || 0) + 1;
           saveState();
           renderCalendar();
         });
@@ -1297,11 +1172,11 @@
           historyToShow.forEach((value, index) => {
             const chip = document.createElement(manualHistory.length ? "button" : "div");
             chip.className =
-              "flex items-center gap-2 rounded-full border border-cerulean/20 bg-white px-3 py-1 text-xs text-slate-600";
+              "flex items-center gap-2 rounded-full border border-midnight/10 bg-white px-3 py-1 text-xs text-harbor";
             if (manualHistory.length) {
-              chip.classList.add("hover:border-cerulean/40");
+              chip.classList.add("hover:border-midnight/30");
               chip.dataset.index = index;
-              chip.innerHTML = `${value} giorni <span class="text-slate-400">x</span>`;
+              chip.innerHTML = `${value} giorni <span class="text-harbor/50">x</span>`;
             } else {
               chip.innerHTML = `${value} giorni`;
             }
@@ -1313,99 +1188,83 @@
           const buttons = elements.modeToggle.querySelectorAll(".mode-btn");
           buttons.forEach((btn) => {
             if (btn.dataset.mode === state.settings.mode) {
-              btn.classList.add("bg-cerulean", "text-white");
-              btn.classList.remove("text-slate-600");
+              btn.classList.add("bg-midnight", "text-white");
+              btn.classList.remove("text-harbor");
             } else {
-              btn.classList.remove("bg-cerulean", "text-white");
-              btn.classList.add("text-slate-600");
+              btn.classList.remove("bg-midnight", "text-white");
+              btn.classList.add("text-harbor");
             }
           });
 
           if (state.settings.mode === "conception") {
             elements.modeHelp.innerHTML =
-              "<div class='rounded-xl bg-tropical-teal/10 px-3 py-2'>Evidenziamo la finestra fertile con segnali turchesi per favorire il concepimento.</div>";
+              "<div class='rounded-xl bg-tide/15 px-3 py-2'>Mettiamo in luce la finestra fertile con un bagliore delicato.</div>";
           } else {
             elements.modeHelp.innerHTML =
-              "<div class='rounded-xl bg-vibrant-coral/10 px-3 py-2'>Evidenziamo i giorni a rischio con segnali corallo. Se i cicli sono irregolari ampliamo il margine.</div>";
+              "<div class='rounded-xl bg-coral/15 px-3 py-2'>Segnaliamo i giorni sensibili con attenzione extra e margine di sicurezza.</div>";
           }
         }
 
         function renderCalendar() {
-          const viewDate = parseYearMonth(state.viewMonth);
-          const monthStart = new Date(viewDate.getFullYear(), viewDate.getMonth(), 1, 12);
-          const monthEnd = new Date(viewDate.getFullYear(), viewDate.getMonth() + 1, 0, 12);
-          const startDay = (monthStart.getDay() + 6) % 7;
-          const totalCells = Math.ceil((startDay + monthEnd.getDate()) / 7) * 7;
-          const gridStart = addDays(monthStart, -startDay);
-          const gridEnd = addDays(gridStart, totalCells - 1);
-
-          const { sigma } = computeStats();
+          const orbitDays = 28;
+          const { sigma, avgRounded } = computeStats();
+          const cycleLength = clamp(avgRounded, 20, 45);
           const margin = state.settings.mode === "contraception" && sigma >= 2 ? Math.ceil(sigma) : 0;
-          const cycles = buildCycles(gridStart, gridEnd);
+          const offset = Number(state.viewCycleOffset || 0);
+          const baseStart = addDays(getLastPeriodStart(), offset * cycleLength);
+          const baseEnd = addDays(baseStart, orbitDays - 1);
+          const cycles = buildCycles(baseStart, baseEnd);
 
-          elements.monthLabel.textContent = formatMonthLabel(viewDate);
-          elements.calendarGrid.innerHTML = "";
+          if (elements.monthLabel) {
+            elements.monthLabel.textContent = `${formatDateLabel(baseStart)} • ${formatDateLabel(baseEnd)}`;
+          }
 
-          for (let i = 0; i < totalCells; i += 1) {
-            const date = addDays(gridStart, i);
+          const container = elements.calendarGrid;
+          if (!container) return;
+          container.innerHTML = "";
+
+          for (let i = 0; i < orbitDays; i += 1) {
+            const date = addDays(baseStart, i);
             const dateStr = formatDateISO(date);
-            const inMonth = date.getMonth() === viewDate.getMonth();
             const status = getDayStatus(date, cycles, margin);
-            const log = state.logs[dateStr];
-
-            const cell = document.createElement("button");
-            cell.dataset.date = dateStr;
-            cell.className = [
-              "day-cell rounded-2xl border p-1.5 text-left text-xs sm:p-2 min-h-[78px] sm:min-h-[96px]",
-              inMonth ? "bg-white/90 text-slate-700" : "bg-white/50 text-slate-400",
-              status.isMenses ? "border-soft-apricot/70" : "border-slate-200/60",
-              status.isFertile && state.settings.mode === "conception"
-                ? "bg-tropical-teal/10 border-tropical-teal/40"
-                : "",
-              status.isRisk && state.settings.mode === "contraception"
-                ? status.isRiskMargin
-                  ? "bg-soft-apricot/70 border-vibrant-coral/30 ring-1 ring-vibrant-coral/20"
-                  : "bg-vibrant-coral/15 border-vibrant-coral/40"
-                : "",
-              state.selectedDate === dateStr ? "ring-2 ring-cerulean/70" : "",
-              isSameDay(date, today) ? "ring-1 ring-cerulean/30" : "",
+            const phaseInfo = getPhaseForDate(date);
+            const segment = document.createElement("button");
+            segment.dataset.date = dateStr;
+            segment.style.setProperty("--angle", `${(360 / orbitDays) * i}deg`);
+            segment.className = [
+              "orbit-segment",
+              `phase-${phaseInfo.phase}`,
+              status.isMenses ? "is-menses" : "",
+              status.isOvulation ? "is-ovulation" : "",
+              status.isFertile && state.settings.mode === "conception" ? "is-fertile" : "",
+              status.isRisk && state.settings.mode === "contraception" ? "is-risk" : "",
+              status.isRiskMargin ? "is-margin" : "",
+              state.selectedDate === dateStr ? "is-selected" : "",
+              isSameDay(date, today) ? "is-today" : "",
             ]
               .filter(Boolean)
               .join(" ");
 
-            const titleParts = [];
-            if (status.isMenses) titleParts.push("Mestruazione prevista");
+            const titleParts = [formatDateLabel(date)];
+            if (status.isMenses) titleParts.push("Mestruazione");
             if (status.isFertile) titleParts.push("Finestra fertile");
-            if (status.isOvulation) titleParts.push("Ovulazione stimata");
+            if (status.isOvulation) titleParts.push("Ovulazione");
             if (status.isRisk && state.settings.mode === "contraception") titleParts.push("Giorno a rischio");
-            cell.title = titleParts.join(" | ");
+            segment.title = titleParts.join(" · ");
 
-            const header = document.createElement("div");
-            header.className = "flex items-start justify-between";
-            header.innerHTML = `
-              <span class="text-sm font-semibold">${date.getDate()}</span>
-              <span class="flex items-center gap-1">
-                ${status.isOvulation ? iconSpark() : ""}
-                ${status.isFertile && state.settings.mode === "conception" ? iconLeaf("tropical") : ""}
-                ${status.isRisk && state.settings.mode === "contraception" ? iconWarning(status.isRiskMargin) : ""}
-              </span>
-            `;
-            cell.appendChild(header);
+            container.appendChild(segment);
+          }
 
-            const logRow = document.createElement("div");
-            logRow.className = "mt-2 flex flex-wrap items-center gap-1 text-[10px] text-slate-500";
-            if (log?.sex) logRow.innerHTML += iconHeart();
-            if (log?.mucus) logRow.innerHTML += iconDrop();
-            if (log?.temp || log?.temp === 0) logRow.innerHTML += iconThermo(log.temp);
-            cell.appendChild(logRow);
-
-            if (status.isMenses) {
-              const bar = document.createElement("div");
-              bar.className = "mt-2 h-1 w-full rounded-full bg-soft-apricot";
-              cell.appendChild(bar);
-            }
-
-            elements.calendarGrid.appendChild(cell);
+          const selectedDate = parseDateISO(state.selectedDate) || today;
+          const selectedPhase = getPhaseForDate(selectedDate);
+          if (elements.orbitDayLabel) {
+            elements.orbitDayLabel.textContent = `Giorno ${selectedPhase.dayIndex}`;
+          }
+          if (elements.orbitDateLabel) {
+            elements.orbitDateLabel.textContent = formatDateLabel(selectedDate);
+          }
+          if (elements.orbitPhaseLabel) {
+            elements.orbitPhaseLabel.textContent = phaseLabel(selectedPhase.phase);
           }
         }
 
@@ -1426,14 +1285,12 @@
           elements.ovulationLabel.textContent = formatDateLabel(ovulation);
           elements.fertileLabel.textContent = `${formatDateLabel(fertileStart)} - ${formatDateLabel(fertileEnd)}`;
 
-          const noteParts = [
-            `Media calcolata: ${avg.toFixed(1)} giorni (usata ${avgRounded}).`,
-          ];
+          const noteParts = [`Media del tuo ritmo: ${avg.toFixed(1)} giorni (usata ${avgRounded}).`];
 
           if (sigma > 0) {
             noteParts.push(`Deviazione standard: ${sigma.toFixed(1)} giorni.`);
           } else {
-            noteParts.push("Deviazione standard: non disponibile con pochi dati.");
+            noteParts.push("Variabilita: non disponibile con pochi dati.");
           }
 
           if (margin > 0) {
@@ -1449,18 +1306,148 @@
 
           if (!insights.length) {
             const fallback = document.createElement("li");
-            fallback.className = "rounded-full border border-cerulean/20 bg-white/80 px-3 py-2 text-xs text-slate-500";
-            fallback.textContent = "Continua a registrare dati per sbloccare insights personalizzati.";
+            fallback.className = "rounded-full border border-midnight/10 bg-white/80 px-3 py-2 text-xs text-harbor";
+            fallback.textContent = "Continua a registrare dati per far emergere nuove connessioni.";
             elements.insightsList.appendChild(fallback);
             return;
           }
 
           insights.forEach((text) => {
             const item = document.createElement("li");
-            item.className = "rounded-full border border-cerulean/30 bg-white/80 px-3 py-2 text-xs text-slate-700";
+            item.className = "rounded-full border border-midnight/10 bg-white/80 px-3 py-2 text-xs text-midnight";
             item.textContent = text;
             elements.insightsList.appendChild(item);
           });
+        }
+
+        function renderWeeklyInsights() {
+          if (!elements.weeklyInsights) return;
+          const items = generateWeeklyInsights();
+          elements.weeklyInsights.innerHTML = "";
+          if (!items.length) {
+            const fallback = document.createElement("li");
+            fallback.className = "rounded-2xl border border-midnight/10 bg-white/80 px-3 py-2 text-xs text-harbor";
+            fallback.textContent = "Aggiungi qualche check-in per ricevere il riassunto settimanale.";
+            elements.weeklyInsights.appendChild(fallback);
+            return;
+          }
+          items.forEach((text) => {
+            const item = document.createElement("li");
+            item.className = "rounded-2xl border border-midnight/10 bg-white/80 px-3 py-2 text-sm text-midnight";
+            item.textContent = text;
+            elements.weeklyInsights.appendChild(item);
+          });
+        }
+
+        function renderBodySuggestions() {
+          if (!elements.bodySuggestions) return;
+          const date = parseDateISO(state.selectedDate) || today;
+          const { phase } = getPhaseForDate(date);
+          const suggestions = getSuggestionsForPhase(phase);
+          elements.bodySuggestions.innerHTML = "";
+          suggestions.forEach((text) => {
+            const item = document.createElement("li");
+            item.className = "rounded-2xl border border-midnight/10 bg-white/80 px-3 py-2 text-sm text-midnight";
+            item.textContent = text;
+            elements.bodySuggestions.appendChild(item);
+          });
+        }
+
+        function renderCheckins(log) {
+          document.querySelectorAll(".check-group").forEach((group) => {
+            const field = group.dataset.field;
+            const value = log?.[field] || "";
+            group.querySelectorAll("button[data-value]").forEach((button) => {
+              if (button.dataset.value === value) {
+                button.classList.add("is-active");
+              } else {
+                button.classList.remove("is-active");
+              }
+            });
+          });
+        }
+
+        function renderMoodCreature() {
+          if (!elements.moodCreature) return;
+          const date = parseDateISO(state.selectedDate) || today;
+          const phaseInfo = getPhaseForDate(date);
+          elements.moodCreature.dataset.phase = phaseInfo.phase;
+          if (elements.creatureLabel) {
+            const messages = {
+              menstrual: "Si riposa, respira con te.",
+              menses: "Si riposa, respira con te.",
+              follicular: "Curioso e leggero, pronto a muoversi.",
+              ovulation: "Luminoso e presente, pieno di energia.",
+              luteal: "Introspectivo, cerca quiete.",
+            };
+            elements.creatureLabel.textContent = messages[phaseInfo.phase] || "";
+          }
+        }
+
+        function generateWeeklyInsights() {
+          const insights = [];
+          const todayDate = atNoon(today);
+          const weekDates = [];
+          for (let i = 0; i < 7; i += 1) {
+            weekDates.push(formatDateISO(addDays(todayDate, -i)));
+          }
+
+          const energyMap = { low: 1, steady: 2, high: 3 };
+          const moodLabels = { calm: "calmo", bright: "luminoso", sensitive: "sensibile" };
+
+          const weekEnergy = [];
+          const allEnergy = [];
+          const weekMood = [];
+
+          Object.entries(state.logs).forEach(([dateStr, log]) => {
+            if (!log) return;
+            if (energyMap[log.energy]) {
+              allEnergy.push(energyMap[log.energy]);
+            }
+            if (weekDates.includes(dateStr)) {
+              if (energyMap[log.energy]) weekEnergy.push(energyMap[log.energy]);
+              if (log.mood) weekMood.push(log.mood);
+            }
+          });
+
+          if (weekEnergy.length) {
+            const weekAvg = weekEnergy.reduce((a, b) => a + b, 0) / weekEnergy.length;
+            const overallAvg = allEnergy.length
+              ? allEnergy.reduce((a, b) => a + b, 0) / allEnergy.length
+              : weekAvg;
+            if (weekAvg >= overallAvg + 0.35) {
+              insights.push("Questa settimana la tua energia e stata sopra la media.");
+            } else if (weekAvg <= overallAvg - 0.35) {
+              insights.push("Questa settimana l'energia e stata piu bassa del solito.");
+            } else {
+              insights.push("Energia settimanale stabile e regolare.");
+            }
+          }
+
+          if (weekMood.length) {
+            const moodCount = weekMood.reduce((acc, mood) => {
+              acc[mood] = (acc[mood] || 0) + 1;
+              return acc;
+            }, {});
+            const topMood = Object.entries(moodCount).sort((a, b) => b[1] - a[1])[0][0];
+            insights.push(`Umore prevalente: ${moodLabels[topMood] || topMood}.`);
+          }
+
+          const phaseToday = getPhaseForDate(today).phase;
+          insights.push(`Fase attuale: ${phaseLabel(phaseToday)}.`);
+
+          return insights;
+        }
+
+        function getSuggestionsForPhase(phase) {
+          const suggestions = {
+            menses: ["Riposo gentile", "Idratazione costante", "Calore sul ventre"],
+            menstrual: ["Riposo gentile", "Idratazione costante", "Calore sul ventre"],
+            follicular: ["Movimento leggero", "Creativita", "Pianifica attivita sociali"],
+            ovulation: ["Energia alta: ascoltala", "Passeggiata all'aria aperta", "Nutri la pelle"],
+            luteal: ["Rallenta il ritmo", "Sonno regolare", "Alimenti caldi e nutrienti"],
+          };
+          return suggestions[phase] || ["Ascolta il tuo ritmo", "Respira con calma", "Bevi acqua"];
         }
 
         function openPeriodModal(dateStr) {
@@ -1654,7 +1641,7 @@
 
           drawGrid(ctx, width, height, padding, dpr);
 
-          ctx.strokeStyle = "#0081a7";
+          ctx.strokeStyle = "#1c1c2e";
           ctx.lineWidth = 2 * dpr;
           ctx.beginPath();
           points.forEach((point, index) => {
@@ -1670,7 +1657,7 @@
           const avgY = padding + chartHeight - ((avg - min) / spread) * chartHeight;
           ctx.save();
           ctx.setLineDash([5 * dpr, 5 * dpr]);
-          ctx.strokeStyle = "rgba(0, 175, 185, 0.7)";
+          ctx.strokeStyle = "rgba(91, 192, 190, 0.7)";
           ctx.lineWidth = 1.5 * dpr;
           ctx.beginPath();
           ctx.moveTo(padding, avgY);
@@ -1680,7 +1667,7 @@
 
           points.forEach((point, index) => {
             const isLast = index === points.length - 1;
-            ctx.fillStyle = isLast ? "#f07167" : "#00afb9";
+            ctx.fillStyle = isLast ? "#f2b5a7" : "#5bc0be";
             ctx.beginPath();
             ctx.arc(point.x, point.y, 4 * dpr, 0, Math.PI * 2);
             ctx.fill();
@@ -1805,6 +1792,22 @@
             }
           }
 
+          let prePeriodEnergyCount = 0;
+          let prePeriodEnergyLow = 0;
+          logEntries.forEach((entry) => {
+            const energy = entry.log?.energy;
+            if (!energy) return;
+            const cycle = getCycleForDate(entry.date);
+            const daysToNext = diffDays(cycle.nextPeriod, entry.date);
+            if (daysToNext >= 1 && daysToNext <= 3) {
+              prePeriodEnergyCount += 1;
+              if (energy === "low") prePeriodEnergyLow += 1;
+            }
+          });
+          if (prePeriodEnergyCount >= 3 && prePeriodEnergyLow / prePeriodEnergyCount >= 0.6) {
+            insights.push("Nei 3 giorni prima del ciclo la tua energia tende a calare.");
+          }
+
           const phaseInsight = buildPhaseMessage(getPhaseForDate(today));
           if (phaseInsight) insights.push(phaseInsight);
 
@@ -1814,12 +1817,33 @@
         function renderLog() {
           const dateStr = state.selectedDate || formatDateISO(today);
           const dateObj = parseDateISO(dateStr) || today;
-          const log = state.logs[dateStr] || { sex: false, mucus: "", temp: "" };
+          const log = state.logs[dateStr] || {
+            sex: false,
+            mucus: "",
+            temp: "",
+            energy: "",
+            mood: "",
+            sensation: "",
+            journal: "",
+          };
 
-          elements.logDate.textContent = formatDateLabel(dateObj);
+          if (elements.logDate) {
+            elements.logDate.textContent = formatDateLabel(dateObj);
+          }
           elements.logSex.checked = Boolean(log.sex);
           elements.logMucus.value = log.mucus || "";
           elements.logTemp.value = log.temp === "" || log.temp === undefined ? "" : log.temp;
+          if (elements.journalInput) {
+            elements.journalInput.value = log.journal || "";
+          }
+          if (elements.journalStatus) {
+            elements.journalStatus.textContent = log.journal ? "Nota salvata." : "";
+          }
+
+          renderCheckins(log);
+          renderMoodCreature();
+          renderBodySuggestions();
+          renderWeeklyInsights();
         }
 
         function updateLog(update) {
@@ -1830,7 +1854,11 @@
           const hasContent =
             Boolean(next.sex) ||
             (next.mucus && next.mucus.length > 0) ||
-            (next.temp !== "" && next.temp !== undefined && !Number.isNaN(next.temp));
+            (next.temp !== "" && next.temp !== undefined && !Number.isNaN(next.temp)) ||
+            (next.energy && next.energy.length > 0) ||
+            (next.mood && next.mood.length > 0) ||
+            (next.sensation && next.sensation.length > 0) ||
+            (next.journal && next.journal.length > 0);
 
           if (hasContent) {
             state.logs[dateStr] = next;
@@ -1841,6 +1869,7 @@
           saveState();
           renderCalendar();
           renderInsights();
+          renderLog();
         }
 
         function getCycleForDate(date) {
@@ -1865,8 +1894,8 @@
 
           if (inRange(date, cycle.start, cycle.mensesEnd)) {
             phase = "menses";
-          } else if (inRange(date, cycle.fertileStart, cycle.fertileEnd)) {
-            phase = "fertile";
+          } else if (isSameDay(date, cycle.ovulation)) {
+            phase = "ovulation";
           } else if (date > cycle.ovulation && date < cycle.nextPeriod) {
             phase = "luteal";
           }
@@ -1874,19 +1903,27 @@
           return { phase, dayIndex: diffDays(date, cycle.start) + 1, cycle };
         }
 
-        function buildPhaseMessage(info) {
-          const phaseLabel = {
+        function phaseLabel(phase) {
+          const labels = {
             menses: "mestruazione",
+            menstrual: "mestruazione",
             fertile: "finestra fertile",
+            ovulation: "ovulazione",
             luteal: "fase luteale",
             follicular: "fase follicolare",
           };
-          const label = phaseLabel[info.phase] || "fase";
+          return labels[phase] || "fase";
+        }
+
+        function buildPhaseMessage(info) {
+          const label = phaseLabel(info.phase);
           const day = info.dayIndex;
+          const currentDate = addDays(info.cycle.start, info.dayIndex - 1);
+          const isFertile = inRange(currentDate, info.cycle.fertileStart, info.cycle.fertileEnd);
 
           if (state.settings.mode === "conception") {
-            if (info.phase === "fertile") {
-              return `Oggi sei nella ${label} (giorno ${day}): pianifica rapporti regolari e monitora muco e temperatura.`;
+            if (isFertile) {
+              return `Oggi sei nella finestra fertile (giorno ${day}): pianifica rapporti regolari e monitora muco e temperatura.`;
             }
             if (info.phase === "luteal") {
               return `Oggi sei in ${label} (giorno ${day}): e normale avvertire calo di energia, continua il tracking.`;
@@ -1897,8 +1934,8 @@
             return `Oggi sei in ${label} (giorno ${day}): energia in aumento, prepara i prossimi giorni fertili.`;
           }
 
-          if (info.phase === "fertile") {
-            return `Oggi sei nella ${label} (giorno ${day}): in modalita contraccezione serve maggiore cautela.`;
+          if (isFertile) {
+            return `Oggi sei nella finestra fertile (giorno ${day}): in modalita contraccezione serve maggiore cautela.`;
           }
           if (info.phase === "luteal") {
             return `Oggi sei in ${label} (giorno ${day}): rischio piu basso, ma continua a monitorare.`;
@@ -2050,7 +2087,8 @@
           const historyRaw = Array.isArray(raw.settings?.history) ? raw.settings.history : [];
           merged.settings.history = historyRaw.map(Number).filter((value) => Number.isFinite(value));
 
-          merged.viewMonth = merged.viewMonth || fallback.viewMonth;
+          const viewOffset = Number(raw.viewCycleOffset);
+          merged.viewCycleOffset = Number.isFinite(viewOffset) ? viewOffset : fallback.viewCycleOffset;
           merged.selectedDate = merged.selectedDate || fallback.selectedDate;
 
           if (!merged.periods.length && merged.settings.lastPeriod) {
@@ -2069,7 +2107,7 @@
           state.settings = nextState.settings;
           state.logs = nextState.logs;
           state.periods = nextState.periods || [];
-          state.viewMonth = nextState.viewMonth;
+          state.viewCycleOffset = Number(nextState.viewCycleOffset) || 0;
           state.selectedDate = nextState.selectedDate;
         }
 
@@ -2090,8 +2128,8 @@
           return `${String(date.getDate()).padStart(2, "0")} ${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
         }
 
-        function formatMonthLabel(date) {
-          return `${MONTHS[date.getMonth()]} ${date.getFullYear()}`;
+        function formatTime(date) {
+          return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
         }
 
         function formatDateISO(date) {
@@ -2100,20 +2138,11 @@
           ).padStart(2, "0")}`;
         }
 
-        function formatYearMonth(date) {
-          return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
-        }
-
         function parseDateISO(value) {
           if (!value) return null;
           const [year, month, day] = value.split("-").map(Number);
           if (!year || !month || !day) return null;
           return new Date(year, month - 1, day, 12);
-        }
-
-        function parseYearMonth(value) {
-          const [year, month] = value.split("-").map(Number);
-          return new Date(year, month - 1, 1, 12);
         }
 
         function addDays(date, days) {
@@ -2146,7 +2175,7 @@
 
         function drawGrid(ctx, width, height, padding, dpr) {
           const lineCount = 3;
-          ctx.strokeStyle = "rgba(0, 129, 167, 0.12)";
+          ctx.strokeStyle = "rgba(28, 28, 46, 0.12)";
           ctx.lineWidth = 1 * dpr;
           for (let i = 0; i <= lineCount; i += 1) {
             const y = padding + (i / lineCount) * (height - padding * 2);
@@ -2182,71 +2211,6 @@
 
         function clamp(value, min, max) {
           return Math.min(max, Math.max(min, value));
-        }
-
-        function iconSpark() {
-          return `
-            <span class="text-cerulean">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="m12 3 1.8 4.2 4.2 1.8-4.2 1.8L12 15l-1.8-4.2L6 9l4.2-1.8L12 3Z" />
-              </svg>
-            </span>
-          `;
-        }
-
-        function iconLeaf(color) {
-          const hue = color === "tropical" ? "text-tropical-teal" : "text-cerulean";
-          return `
-            <span class="${hue}">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 10.5c3.5-3.5 7-4 9-4-1 5-4.5 9-9 10-4.5-1-8-5-9-10 2 0 5.5.5 9 4Z" />
-              </svg>
-            </span>
-          `;
-        }
-
-        function iconWarning(isMargin) {
-          return `
-            <span class="${isMargin ? "text-vibrant-coral/70" : "text-vibrant-coral"}">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3 2.5 20h19L12 3Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01" />
-              </svg>
-            </span>
-          `;
-        }
-
-        function iconHeart() {
-          return `
-            <span class="text-vibrant-coral">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.8">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M20.3 6.2a4.5 4.5 0 0 0-6.4 0L12 8.1l-1.9-1.9a4.5 4.5 0 0 0-6.4 6.4l1.9 1.9L12 21l6.5-6.5 1.9-1.9a4.5 4.5 0 0 0 0-6.4Z" />
-              </svg>
-            </span>
-          `;
-        }
-
-        function iconDrop() {
-          return `
-            <span class="text-tropical-teal">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 3c4 5 6 7.5 6 10a6 6 0 0 1-12 0c0-2.5 2-5 6-10Z" />
-              </svg>
-            </span>
-          `;
-        }
-
-        function iconThermo(value) {
-          const label = value !== "" ? `<span class="ml-1">${Number(value).toFixed(1)}</span>` : "";
-          return `
-            <span class="inline-flex items-center text-slate-500">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.6">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 14a2 2 0 1 0 4 0V6a2 2 0 1 0-4 0v8Z" />
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 20a4 4 0 0 0 4-4v-1a4 4 0 0 0-8 0v1a4 4 0 0 0 4 4Z" />
-              </svg>
-              ${label}
-            </span>
-          `;
         }
 
         renderAll();
